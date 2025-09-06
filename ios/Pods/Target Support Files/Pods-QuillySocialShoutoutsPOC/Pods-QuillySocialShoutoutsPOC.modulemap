@@ -1,0 +1,6 @@
+module Pods_QuillySocialShoutoutsPOC {
+  umbrella header "Pods-QuillySocialShoutoutsPOC-umbrella.h"
+
+  export *
+  module * { export * }
+}
