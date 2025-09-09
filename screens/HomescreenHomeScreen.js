@@ -193,7 +193,12 @@ const HomescreenHomeScreen = () => {
         
         {/* Happening Now Section */}
         <View style={styles.happeningSection}>
-          <Text style={styles.sectionTitle}>Happening Now</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Happening Now</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllLink}>view all</Text>
+            </TouchableOpacity>
+          </View>
           
           <View style={styles.noMeetupsContainer}>
             {/* Sleep Icon Placeholder - Replace with actual icon */}
@@ -462,10 +467,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   sectionTitle: {
     fontSize: 14,
     color: '#35303D',
-    marginBottom: 20,
+  },
+  viewAllLink: {
+    fontSize: 14,
+    color: 'rgba(53, 48, 61, 0.5)',
+    textDecorationLine: 'underline',
   },
   noMeetupsContainer: {
     backgroundColor: '#FFFFFF',
