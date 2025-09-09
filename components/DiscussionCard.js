@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons, Entypo } from '@expo/vector-icons';
+import { Colors, Typography, Shadows, Borders, Spacing } from '../config/styles';
 
 const DiscussionCard = ({ 
   discussion, 
@@ -135,16 +136,13 @@ const DiscussionCard = ({
 
 const styles = StyleSheet.create({
   discussionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.grayLight,
+    padding: Spacing.lg - 1,
+    marginBottom: Spacing.lg - 1,
+    marginHorizontal: Spacing.xl,
   },
   discussionHeader: {
     flexDirection: 'row',
@@ -156,21 +154,19 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#35303D',
-    marginRight: 10,
+    backgroundColor: Colors.primary,
+    marginRight: Spacing.sm + 2,
   },
   discussionInfo: {
     flex: 1,
   },
   discussionAuthor: {
+    ...Typography.h3,
     fontSize: 13,
-    fontWeight: '500',
-    color: '#35303D',
     marginBottom: 2,
   },
   discussionTime: {
-    fontSize: 11,
-    color: 'rgba(53, 48, 61, 0.6)',
+    ...Typography.caption,
   },
   discussionMenuButton: {
     padding: 5,
@@ -182,17 +178,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 25,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.sm,
     minWidth: 120,
     zIndex: 1000,
     borderWidth: 1,
-    borderColor: '#E8E8E8',
+    borderColor: Colors.grayLight,
   },
   dropdownItem: {
     paddingHorizontal: 15,
@@ -205,10 +196,8 @@ const styles = StyleSheet.create({
     color: '#35303D',
   },
   discussionDescription: {
-    fontSize: 14,
-    color: '#35303D',
-    lineHeight: 20,
-    marginBottom: 10,
+    ...Typography.body,
+    marginBottom: Spacing.sm + 2,
   },
   discussionImage: {
     width: '100%',
@@ -234,12 +223,11 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   discussionStatText: {
-    fontSize: 12,
-    color: '#35303D',
+    ...Typography.bodySmall,
     letterSpacing: -0.24,
   },
   discussionStatTextActive: {
-    color: '#FF4444',
+    color: Colors.red,
   },
   discussionTag: {
     flexDirection: 'row',

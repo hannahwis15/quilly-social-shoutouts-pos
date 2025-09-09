@@ -661,12 +661,25 @@ const HomescreenHomeScreen = () => {
             </ScrollView>
           ) : (
             <View style={styles.noMeetupsContainer}>
-              {/* Sleep Icon Placeholder - Replace with actual icon */}
-              <View style={[styles.sleepIcon, {backgroundColor: '#E5CFFF', borderRadius: 22}]} />
+              {/* Sleep Icon Placeholder */}
+              <Text style={styles.sleepEmoji}>😴</Text>
               <Text style={styles.noMeetupsText}>No Shoutouts Yet!</Text>
               <Text style={styles.noMeetupsSubtext}>
                 Not sure what to shout-out? Try out one of these:
               </Text>
+              
+              {/* Suggestion pills */}
+              <View style={styles.suggestionContainer}>
+                <TouchableOpacity style={styles.suggestionPill}>
+                  <Text style={styles.suggestionText}>Study session...</Text>
+                  <Text style={styles.suggestionPlus}>+</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.suggestionPill}>
+                  <Text style={styles.suggestionText}>Coffee break...</Text>
+                  <Text style={styles.suggestionPlus}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
@@ -718,12 +731,26 @@ const HomescreenHomeScreen = () => {
           )}
           
           {/* Discussion Cards */}
-          {discussions
-            .filter(discussion => 
+          {(() => {
+            const filteredDiscussions = discussions.filter(discussion => 
               selectedCategories.length === 0 || 
               selectedCategories.includes(discussion.category)
-            )
-            .map((discussion) => {
+            );
+            
+            if (filteredDiscussions.length === 0 && selectedCategories.length > 0) {
+              // Show empty state when filters are applied but no results
+              return (
+                <View style={styles.discussionEmptyState}>
+                  <Text style={styles.emptyStateEmoji}>😔</Text>
+                  <Text style={styles.emptyStateTitle}>No discussions found</Text>
+                  <Text style={styles.emptyStateSubtitle}>
+                    Try adjusting your filters or browse all discussions
+                  </Text>
+                </View>
+              );
+            }
+            
+            return filteredDiscussions.map((discussion) => {
               const category = getCategoryById(discussion.category);
               const isOwner = discussion.owner.id === currentUserId;
               
@@ -738,7 +765,8 @@ const HomescreenHomeScreen = () => {
                   onReactionToggle={handleReactionToggle}
                 />
               );
-            })}
+            });
+          })()}
         </View>
         
         </View>
@@ -900,11 +928,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 18,
     borderRadius: 11,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     zIndex: 5,
   },
   shareHeader: {
@@ -996,11 +1021,6 @@ const styles = StyleSheet.create({
     height: 196,
     marginRight: 15,
     padding: 14,
-    shadowColor: '#E5CFFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.67,
-    elevation: 3,
   },
   shoutoutHeader: {
     flexDirection: 'row',
@@ -1135,20 +1155,15 @@ const styles = StyleSheet.create({
   noMeetupsContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    borderWidth: 0.5,
-    borderColor: 'rgba(53, 48, 61, 0.8)',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    height: 228,
+    paddingHorizontal: 25,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    justifyContent: 'center',
   },
-  sleepIcon: {
-    width: 43,
-    height: 43,
+  sleepEmoji: {
+    fontSize: 40,
     marginBottom: 15,
   },
   noMeetupsText: {
@@ -1161,7 +1176,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B6B6B',
     textAlign: 'center',
-    maxWidth: 195,
+    maxWidth: 160,
+    lineHeight: 18,
   },
   discussionSection: {
     paddingTop: 20,
@@ -1231,6 +1247,54 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(53,48,61,0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  discussionEmptyState: {
+    alignItems: 'center',
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    marginTop: -10,
+  },
+  emptyStateEmoji: {
+    fontSize: 35,
+    marginBottom: 12,
+  },
+  emptyStateTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#35303D',
+    marginBottom: 6,
+  },
+  emptyStateSubtitle: {
+    fontSize: 12,
+    color: 'rgba(53, 48, 61, 0.6)',
+    textAlign: 'center',
+  },
+  suggestionContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  suggestionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E9EEA8',
+    paddingLeft: 14,
+    paddingRight: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  suggestionText: {
+    fontSize: 13,
+    color: '#35303D',
+    marginRight: 10,
+  },
+  suggestionPlus: {
+    fontSize: 20,
+    color: '#35303D',
+    fontWeight: '400',
+    lineHeight: 20,
   },
 });
 
