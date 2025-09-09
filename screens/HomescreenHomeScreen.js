@@ -13,10 +13,13 @@ import {
   Animated,
   Platform,
   Pressable,
+  Linking,
 } from 'react-native';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, Feather, MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
 import PostCreationModal from '../components/PostCreationModal';
 import AttendingConfirmationModal from '../components/AttendingConfirmationModal';
+import CategorySelectionModal from '../components/CategorySelectionModal';
+import { CATEGORY_GROUPS } from '../config/categories';
 
 const { width: screenWidth } = Dimensions.get('window');
 const HEADER_MAX_HEIGHT = 311;
@@ -28,6 +31,9 @@ const HomescreenHomeScreen = () => {
   const [showPostModal, setShowPostModal] = useState(false);
   const [showAttendingModal, setShowAttendingModal] = useState(false);
   const [selectedShoutoutOwner, setSelectedShoutoutOwner] = useState('');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [dropdownMenus, setDropdownMenus] = useState({});
   const scrollY = useRef(new Animated.Value(0)).current;
   
   const houseName = "KAHLO HOUSE";
@@ -35,53 +41,78 @@ const HomescreenHomeScreen = () => {
   const housematesCount = "meet my housemates";
   
   // Sample shoutouts data - replace with actual data from API/state
+  const currentUserId = 'user123'; // Replace with actual current user ID
+  
   const [shoutouts, setShoutouts] = useState([
     {
       id: 1,
-      userName: 'You',
-      userAvatar: require('../assets/images/Avatar.png'),
-      content: 'study date anyone?',
-      timeAgo: '21 min ago',
+      owner: {
+        id: 'user123',
+        name: 'John Doe',
+        avatar: require('../assets/images/Avatar.png')
+      },
+      title: 'study date anyone?',
+      created_at: new Date(Date.now() - 21 * 60 * 1000), // 21 minutes ago
       time: '11am',
       location: 'Glade',
-      isOwner: true,
+      locationGps: 'https://maps.google.com/?q=37.8719,-122.2585',
       attending: false,
-      attendees: [
-        { avatar: require('../assets/images/Avatar.png') },
-        { avatar: require('../assets/images/Avatar.png') },
-        { avatar: require('../assets/images/Avatar.png') }
+      participants: [
+        { id: 'user2', avatar: require('../assets/images/Avatar.png') },
+        { id: 'user3', avatar: require('../assets/images/Avatar.png') },
+        { id: 'user4', avatar: require('../assets/images/Avatar.png') }
       ]
     },
     {
       id: 2,
-      userName: 'Hannah',
-      userAvatar: require('../assets/images/Avatar.png'),
-      content: "let's grab coffee!",
-      timeAgo: '45 min ago',
+      owner: {
+        id: 'user456',
+        name: 'Hannah',
+        avatar: require('../assets/images/Avatar.png')
+      },
+      title: "let's grab coffee!",
+      created_at: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
       time: '2pm',
       location: 'Campus Cafe',
-      isOwner: false,
+      locationGps: 'https://maps.google.com/?q=37.8720,-122.2590',
       attending: false,
-      attendees: [
-        { avatar: require('../assets/images/Avatar.png') },
-        { avatar: require('../assets/images/Avatar.png') }
+      participants: [
+        { id: 'user5', avatar: require('../assets/images/Avatar.png') },
+        { id: 'user6', avatar: require('../assets/images/Avatar.png') }
       ]
     },
     {
       id: 3,
-      userName: 'Lily',
-      userAvatar: require('../assets/images/Avatar.png'),
-      content: 'need more players for volleyball!',
-      timeAgo: '1 hr ago',
+      owner: {
+        id: 'user789',
+        name: 'Lily',
+        avatar: require('../assets/images/Avatar.png')
+      },
+      title: 'need more players for volleyball!',
+      created_at: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
       time: '12pm',
       location: 'Main Gym',
-      isOwner: false,
+      locationGps: 'https://maps.google.com/?q=37.8715,-122.2580',
       attending: true,
-      attendees: [
-        { avatar: require('../assets/images/Avatar.png') }
+      participants: [
+        { id: 'user7', avatar: require('../assets/images/Avatar.png') }
       ]
     }
   ]);
+  
+  // Helper function to calculate time ago
+  const getTimeAgo = (date) => {
+    const now = new Date();
+    const diff = now - new Date(date);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+    return 'just now';
+  };
   
   const handleAttendToggle = (shoutoutId, ownerName) => {
     setShoutouts(prevShoutouts => 
@@ -99,24 +130,251 @@ const HomescreenHomeScreen = () => {
     );
   };
   
-  const discussions = [
+  // Sample discussions data
+  const [discussions, setDiscussions] = useState([
     {
       id: 1,
-      author: "Lily A.",
-      avatar: require('../assets/images/Avatar.png'),
-      message: "Anybody know any quiet places to study and allows drinks?",
-      tag: "Dating",
-      timeAgo: "2h",
+      owner: {
+        id: 'user456',
+        name: 'Lily A.',
+        avatar: require('../assets/images/Avatar.png')
+      },
+      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      description: "Anybody know any quiet places to study and allows drinks?",
+      category: 'dating',
+      image: null,
+      reactions: [
+        { id: 1, user_id: 'user123', type: 'heart' },
+        { id: 2, user_id: 'user789', type: 'heart' },
+        { id: 3, user_id: 'user101', type: 'heart' },
+        { id: 4, user_id: 'user102', type: 'heart' },
+        { id: 5, user_id: 'user103', type: 'heart' },
+        { id: 6, user_id: 'user104', type: 'heart' },
+        { id: 7, user_id: 'user105', type: 'heart' },
+        { id: 8, user_id: 'user106', type: 'heart' },
+        { id: 9, user_id: 'user107', type: 'heart' },
+        { id: 10, user_id: 'user108', type: 'heart' },
+        { id: 11, user_id: 'user109', type: 'heart' },
+        { id: 12, user_id: 'user110', type: 'heart' }
+      ],
+      comments: [
+        { id: 1, user_id: 'user201', text: 'Try the library cafe!' },
+        { id: 2, user_id: 'user202', text: 'Starbucks on 5th is quiet' },
+        { id: 3, user_id: 'user203', text: 'The study lounge is great' },
+        { id: 4, user_id: 'user204', text: 'Coffee Bean has good spots' },
+        { id: 5, user_id: 'user205', text: 'Try the quiet floor in the library' },
+        { id: 6, user_id: 'user206', text: 'There is a nice cafe near campus' },
+        { id: 7, user_id: 'user207', text: 'I know a good place!' },
+        { id: 8, user_id: 'user208', text: 'The student center has quiet areas' },
+        { id: 9, user_id: 'user209', text: 'Try the bookstore cafe' },
+        { id: 10, user_id: 'user210', text: 'The park nearby is peaceful' },
+        { id: 11, user_id: 'user211', text: 'Second floor of the science building' },
+        { id: 12, user_id: 'user212', text: 'The courtyard is nice' },
+        { id: 13, user_id: 'user213', text: 'Try early mornings at any cafe' },
+        { id: 14, user_id: 'user214', text: 'The east wing is usually empty' },
+        { id: 15, user_id: 'user215', text: 'I study at home' },
+        { id: 16, user_id: 'user216', text: 'The music building has quiet rooms' },
+        { id: 17, user_id: 'user217', text: 'Try the graduate lounge' },
+        { id: 18, user_id: 'user218', text: 'The rooftop garden is amazing' },
+        { id: 19, user_id: 'user219', text: 'Near the fountain is quiet' },
+        { id: 20, user_id: 'user220', text: 'The old library building' },
+        { id: 21, user_id: 'user221', text: 'Study rooms can be booked' },
+        { id: 22, user_id: 'user222', text: 'The basement level is quiet' },
+        { id: 23, user_id: 'user223', text: 'Try the medical library' },
+        { id: 24, user_id: 'user224', text: 'The law library allows guests' },
+        { id: 25, user_id: 'user225', text: 'Art building has nice spaces' },
+        { id: 26, user_id: 'user226', text: 'The chapel is peaceful' },
+        { id: 27, user_id: 'user227', text: 'Computer lab after hours' },
+        { id: 28, user_id: 'user228', text: 'The archives room' },
+        { id: 29, user_id: 'user229', text: 'Faculty lounge if you have access' },
+        { id: 30, user_id: 'user230', text: 'Great suggestions everyone!' }
+      ],
+      shares: [
+        { id: 1, user_id: 'user301', shared_at: new Date() },
+        { id: 2, user_id: 'user302', shared_at: new Date() }
+      ]
     },
     {
       id: 2,
-      author: "Lily A.",
-      avatar: require('../assets/images/Avatar(1).png'),
-      message: "Anybody know any quiet places to study and allows drinks?",
-      tag: "Dating",
-      timeAgo: "4h",
+      owner: {
+        id: 'user123',
+        name: 'John Doe',
+        avatar: require('../assets/images/Avatar(1).png')
+      },
+      created_at: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+      description: "Looking for recommendations on the best coffee shops around campus!",
+      category: 'food',
+      image: null,
+      reactions: [
+        { id: 1, user_id: 'user401', type: 'heart' },
+        { id: 2, user_id: 'user402', type: 'heart' },
+        { id: 3, user_id: 'user403', type: 'heart' },
+        { id: 4, user_id: 'user404', type: 'heart' },
+        { id: 5, user_id: 'user405', type: 'heart' },
+        { id: 6, user_id: 'user406', type: 'heart' },
+        { id: 7, user_id: 'user407', type: 'heart' },
+        { id: 8, user_id: 'user408', type: 'heart' }
+      ],
+      comments: [
+        { id: 1, user_id: 'user501', text: 'Blue Bottle is the best!' },
+        { id: 2, user_id: 'user502', text: 'Try Philz Coffee' },
+        { id: 3, user_id: 'user503', text: 'Peets has good wifi' },
+        { id: 4, user_id: 'user504', text: 'The campus cafe is actually decent' },
+        { id: 5, user_id: 'user505', text: 'Local Grounds is my favorite' },
+        { id: 6, user_id: 'user506', text: 'Ritual Coffee Roasters' },
+        { id: 7, user_id: 'user507', text: 'Four Barrel Coffee' },
+        { id: 8, user_id: 'user508', text: 'Verve Coffee' },
+        { id: 9, user_id: 'user509', text: 'Sightglass Coffee' },
+        { id: 10, user_id: 'user510', text: 'Equator Coffees' },
+        { id: 11, user_id: 'user511', text: 'Saint Frank Coffee' },
+        { id: 12, user_id: 'user512', text: 'Andytown Coffee' },
+        { id: 13, user_id: 'user513', text: 'Flywheel Coffee' },
+        { id: 14, user_id: 'user514', text: 'Wrecking Ball Coffee' },
+        { id: 15, user_id: 'user515', text: 'Thanks for all the suggestions!' }
+      ],
+      shares: [
+        { id: 1, user_id: 'user601', shared_at: new Date() }
+      ]
     },
-  ];
+    {
+      id: 3,
+      owner: {
+        id: 'user789',
+        name: 'Sarah M.',
+        avatar: require('../assets/images/Avatar(1).png')
+      },
+      created_at: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+      description: "Anyone interested in starting a book club? Let's discuss our favorite reads!",
+      category: 'hobbies',
+      image: null,
+      reactions: [
+        { id: 1, user_id: 'user701', type: 'heart' },
+        { id: 2, user_id: 'user702', type: 'heart' },
+        { id: 3, user_id: 'user703', type: 'heart' },
+        { id: 4, user_id: 'user704', type: 'heart' },
+        { id: 5, user_id: 'user705', type: 'heart' },
+        { id: 6, user_id: 'user706', type: 'heart' },
+        { id: 7, user_id: 'user707', type: 'heart' },
+        { id: 8, user_id: 'user708', type: 'heart' },
+        { id: 9, user_id: 'user709', type: 'heart' },
+        { id: 10, user_id: 'user710', type: 'heart' },
+        { id: 11, user_id: 'user711', type: 'heart' },
+        { id: 12, user_id: 'user712', type: 'heart' },
+        { id: 13, user_id: 'user713', type: 'heart' },
+        { id: 14, user_id: 'user714', type: 'heart' },
+        { id: 15, user_id: 'user715', type: 'heart' },
+        { id: 16, user_id: 'user716', type: 'heart' },
+        { id: 17, user_id: 'user717', type: 'heart' },
+        { id: 18, user_id: 'user718', type: 'heart' },
+        { id: 19, user_id: 'user719', type: 'heart' },
+        { id: 20, user_id: 'user720', type: 'heart' },
+        { id: 21, user_id: 'user721', type: 'heart' },
+        { id: 22, user_id: 'user722', type: 'heart' },
+        { id: 23, user_id: 'user723', type: 'heart' },
+        { id: 24, user_id: 'user724', type: 'heart' }
+      ],
+      comments: [
+        { id: 1, user_id: 'user801', text: "I'm interested!" },
+        { id: 2, user_id: 'user802', text: 'Count me in!' },
+        { id: 3, user_id: 'user803', text: 'What genres are you thinking?' },
+        { id: 4, user_id: 'user804', text: 'Fiction or non-fiction?' },
+        { id: 5, user_id: 'user805', text: 'I love mystery novels' },
+        { id: 6, user_id: 'user806', text: 'Sci-fi fan here!' },
+        { id: 7, user_id: 'user807', text: 'Historical fiction is my favorite' },
+        { id: 8, user_id: 'user808', text: 'Can we do classics?' },
+        { id: 9, user_id: 'user809', text: 'Modern literature would be cool' },
+        { id: 10, user_id: 'user810', text: 'How about monthly meetings?' },
+        { id: 11, user_id: 'user811', text: 'Weekly would be better' },
+        { id: 12, user_id: 'user812', text: 'Bi-weekly works for me' },
+        { id: 13, user_id: 'user813', text: 'Where would we meet?' },
+        { id: 14, user_id: 'user814', text: 'Library has meeting rooms' },
+        { id: 15, user_id: 'user815', text: 'Coffee shop meetings?' },
+        { id: 16, user_id: 'user816', text: 'Virtual meetings too?' },
+        { id: 17, user_id: 'user817', text: 'I can help organize' },
+        { id: 18, user_id: 'user818', text: 'Should we create a group chat?' },
+        { id: 19, user_id: 'user819', text: 'Discord server?' },
+        { id: 20, user_id: 'user820', text: 'WhatsApp group?' },
+        { id: 21, user_id: 'user821', text: 'Email list would work' },
+        { id: 22, user_id: 'user822', text: 'When do we start?' },
+        { id: 23, user_id: 'user823', text: 'Next week?' },
+        { id: 24, user_id: 'user824', text: 'Excited to join!' },
+        { id: 25, user_id: 'user825', text: 'Book recommendations?' },
+        { id: 26, user_id: 'user826', text: 'The Midnight Library' },
+        { id: 27, user_id: 'user827', text: 'Project Hail Mary' },
+        { id: 28, user_id: 'user828', text: 'Klara and the Sun' },
+        { id: 29, user_id: 'user829', text: 'The Vanishing Half' },
+        { id: 30, user_id: 'user830', text: 'Anxious People' },
+        { id: 31, user_id: 'user831', text: 'The Seven Husbands of Evelyn Hugo' },
+        { id: 32, user_id: 'user832', text: 'Circe' },
+        { id: 33, user_id: 'user833', text: 'Where the Crawdads Sing' },
+        { id: 34, user_id: 'user834', text: 'The Silent Patient' },
+        { id: 35, user_id: 'user835', text: 'Atomic Habits' },
+        { id: 36, user_id: 'user836', text: 'Educated' },
+        { id: 37, user_id: 'user837', text: 'Becoming' },
+        { id: 38, user_id: 'user838', text: 'Sapiens' },
+        { id: 39, user_id: 'user839', text: 'The Body Keeps the Score' },
+        { id: 40, user_id: 'user840', text: 'Thinking, Fast and Slow' },
+        { id: 41, user_id: 'user841', text: 'Great suggestions!' },
+        { id: 42, user_id: 'user842', text: "Let's vote on the first book" }
+      ],
+      shares: [
+        { id: 1, user_id: 'user901', shared_at: new Date() },
+        { id: 2, user_id: 'user902', shared_at: new Date() },
+        { id: 3, user_id: 'user903', shared_at: new Date() },
+        { id: 4, user_id: 'user904', shared_at: new Date() },
+        { id: 5, user_id: 'user905', shared_at: new Date() }
+      ]
+    }
+  ]);
+  
+  // Get all categories flattened
+  const allCategories = Object.values(CATEGORY_GROUPS).flatMap(group => group.categories);
+  
+  // Get category info by ID
+  const getCategoryById = (categoryId) => {
+    return allCategories.find(cat => cat.id === categoryId);
+  };
+  
+  // Toggle dropdown menu for a discussion
+  const toggleDropdown = (discussionId) => {
+    setDropdownMenus(prev => ({
+      ...prev,
+      [discussionId]: !prev[discussionId]
+    }));
+  };
+  
+  // Handle dropdown action
+  const handleDropdownAction = (action, discussionId) => {
+    const discussion = discussions.find(d => d.id === discussionId);
+    
+    if (action === 'delete' && discussion.owner.id === currentUserId) {
+      setDiscussions(prev => prev.filter(d => d.id !== discussionId));
+    } else if (action === 'edit' && discussion.owner.id === currentUserId) {
+      // Handle edit
+      console.log('Edit discussion:', discussionId);
+    } else if (action === 'share') {
+      // Handle share
+      console.log('Share discussion:', discussionId);
+    }
+    
+    // Close dropdown
+    setDropdownMenus(prev => ({ ...prev, [discussionId]: false }));
+  };
+  
+  // Handle category selection
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      }
+      return [...prev, categoryId];
+    });
+  };
+  
+  // Remove category filter
+  const removeCategoryFilter = (categoryId) => {
+    setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+  };
 
   // Animation interpolations
   const headerTranslate = scrollY.interpolate({
@@ -280,20 +538,22 @@ const HomescreenHomeScreen = () => {
                   {/* Profile section */}
                   <View style={styles.shoutoutHeader}>
                     <Image 
-                      source={shoutout.userAvatar || require('../assets/images/Avatar.png')}
+                      source={shoutout.owner.avatar}
                       style={styles.shoutoutAvatar}
                     />
                     <View style={styles.shoutoutUserInfo}>
-                      <Text style={styles.shoutoutUserName}>{shoutout.userName || 'You'}</Text>
-                      <Text style={styles.shoutoutTime}>{shoutout.timeAgo || '21 min ago'}</Text>
+                      <Text style={styles.shoutoutUserName}>
+                        {shoutout.owner.id === currentUserId ? 'You' : shoutout.owner.name}
+                      </Text>
+                      <Text style={styles.shoutoutTime}>{getTimeAgo(shoutout.created_at)}</Text>
                     </View>
-                    {/* Attendees avatars */}
-                    {shoutout.attendees && shoutout.attendees.length > 0 && (
+                    {/* Participants avatars */}
+                    {shoutout.participants && shoutout.participants.length > 0 && (
                       <View style={styles.attendeesContainer}>
-                        {shoutout.attendees.slice(0, 3).map((attendee, idx) => (
+                        {shoutout.participants.slice(0, 3).map((participant, idx) => (
                           <Image 
                             key={idx}
-                            source={attendee.avatar}
+                            source={participant.avatar}
                             style={[styles.attendeeAvatar, { marginLeft: idx > 0 ? -8 : 0 }]}
                           />
                         ))}
@@ -301,27 +561,34 @@ const HomescreenHomeScreen = () => {
                     )}
                   </View>
                   
-                  {/* Shoutout content */}
-                  <Text style={styles.shoutoutContent}>{shoutout.content}</Text>
+                  {/* Shoutout title */}
+                  <Text style={styles.shoutoutContent}>{shoutout.title}</Text>
                   
                   {/* Time and location info */}
                   <View style={styles.shoutoutInfoBox}>
                     <View style={styles.shoutoutInfoRow}>
                       <View style={styles.shoutoutInfoItem}>
                         <Ionicons name="time-outline" size={10} color="rgba(53,48,61,0.8)" />
-                        <Text style={styles.shoutoutInfoText}>{shoutout.time || '11am'}</Text>
+                        <Text style={styles.shoutoutInfoText}>{shoutout.time}</Text>
                       </View>
                       <View style={styles.shoutoutInfoDivider} />
-                      <View style={styles.shoutoutInfoItem}>
+                      <TouchableOpacity 
+                        style={styles.shoutoutInfoItem}
+                        onPress={() => {
+                          if (shoutout.locationGps) {
+                            Linking.openURL(shoutout.locationGps);
+                          }
+                        }}
+                      >
                         <Ionicons name="location-outline" size={10} color="rgba(53,48,61,0.8)" />
-                        <Text style={styles.shoutoutInfoText}>{shoutout.location || 'Glade'}</Text>
-                      </View>
+                        <Text style={styles.shoutoutInfoText}>{shoutout.location}</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                   
                   {/* Action buttons - conditional based on ownership */}
                   <View style={styles.shoutoutActions}>
-                    {shoutout.isOwner ? (
+                    {shoutout.owner.id === currentUserId ? (
                       <>
                         <TouchableOpacity style={styles.shoutoutActionButton}>
                           <Ionicons name="trash-outline" size={10} color="rgba(53,48,61,0.8)" />
@@ -339,7 +606,7 @@ const HomescreenHomeScreen = () => {
                             styles.shoutoutComingButton,
                             shoutout.attending && styles.shoutoutAttendingButton
                           ]}
-                          onPress={() => handleAttendToggle(shoutout.id, shoutout.userName)}
+                          onPress={() => handleAttendToggle(shoutout.id, shoutout.owner.name)}
                         >
                           {!shoutout.attending && (
                             <Text style={styles.shoutoutActionText}>Coming?</Text>
@@ -378,49 +645,166 @@ const HomescreenHomeScreen = () => {
           )}
         </View>
         
-        {/* Discussion Posts */}
+        {/* Discussions Section */}
         <View style={styles.discussionSection}>
-          {discussions.map((discussion) => (
-            <View key={discussion.id} style={styles.discussionCard}>
-              <View style={styles.discussionHeader}>
-                <Image source={discussion.avatar} style={styles.discussionAvatar} />
-                <Text style={styles.discussionAuthor}>{discussion.author}</Text>
-                <View style={styles.discussionTag}>
-                  {/* Tag Icon */}
-                  <View style={[styles.tagIcon, {backgroundColor: '#FF69B4', borderRadius: 4}]} />
-                  <Text style={styles.tagText}>{discussion.tag}</Text>
-                </View>
-              </View>
-              
-              <Text style={styles.discussionMessage}>{discussion.message}</Text>
-              
-              <TouchableOpacity style={styles.postButton}>
-                <Text style={styles.postButtonText}>Post</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+          {/* Section Header */}
+          <View style={styles.discussionSectionHeader}>
+            <Text style={styles.discussionSectionTitle}>Community</Text>
+            <TouchableOpacity 
+              style={styles.categoriesButton}
+              onPress={() => setShowCategoryModal(true)}
+            >
+              <Feather name="filter" size={14} color="#35303D" />
+              <Text style={styles.categoriesButtonText}>Categories</Text>
+            </TouchableOpacity>
+          </View>
           
-          {/* Add more dummy posts to demonstrate scrolling */}
-          {[...Array(3)].map((_, index) => (
-            <View key={`dummy-${index}`} style={styles.discussionCard}>
-              <View style={styles.discussionHeader}>
-                <Image source={require('../assets/images/Avatar.png')} style={styles.discussionAvatar} />
-                <Text style={styles.discussionAuthor}>User {index + 3}</Text>
-                <View style={styles.discussionTag}>
-                  <View style={[styles.tagIcon, {backgroundColor: '#FF69B4', borderRadius: 4}]} />
-                  <Text style={styles.tagText}>General</Text>
+          {/* Category Filter Pills - Horizontal Scrolling */}
+          <ScrollView 
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryPillsContainer}
+            contentContainerStyle={styles.categoryPillsContent}
+          >
+            {/* Show selected categories first if any */}
+            {selectedCategories.length > 0 ? (
+              selectedCategories.map(categoryId => {
+                const category = getCategoryById(categoryId);
+                if (!category) return null;
+                
+                return (
+                  <TouchableOpacity
+                    key={categoryId}
+                    style={[
+                      styles.categoryPill,
+                      styles.selectedCategoryPill,
+                      { backgroundColor: category.color }
+                    ]}
+                    onPress={() => removeCategoryFilter(categoryId)}
+                  >
+                    <Text style={styles.categoryPillEmoji}>{category.emoji}</Text>
+                    <Text style={styles.categoryPillText}>{category.label}</Text>
+                    <View style={styles.categoryPillCloseContainer}>
+                      <Ionicons name="close-circle" size={13} color="#35303D" />
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              /* Show some default popular categories when none selected */
+              [
+                { id: 'dating', emoji: '🌹', label: 'Dating', color: '#FFD6E0' },
+                { id: 'housing', emoji: '🏠', label: 'Housing', color: '#E8F4FD' },
+                { id: 'food', emoji: '🍔', label: 'Food', color: '#FFF4E6' },
+                { id: 'hobbies', emoji: '🎨', label: 'Hobbies', color: '#F0E6FF' }
+              ].map(category => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.categoryPill,
+                    { backgroundColor: 'rgba(255,255,255,0.8)' }
+                  ]}
+                  onPress={() => handleCategorySelect(category.id)}
+                >
+                  <Text style={styles.categoryPillEmoji}>{category.emoji}</Text>
+                  <Text style={styles.categoryPillText}>{category.label}</Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+          
+          {/* Discussion Cards */}
+          {discussions
+            .filter(discussion => 
+              selectedCategories.length === 0 || 
+              selectedCategories.includes(discussion.category)
+            )
+            .map((discussion) => {
+              const category = getCategoryById(discussion.category);
+              const isOwner = discussion.owner.id === currentUserId;
+              
+              return (
+                <View key={discussion.id} style={styles.discussionCard}>
+                  <View style={styles.discussionHeader}>
+                    <Image source={discussion.owner.avatar} style={styles.discussionAvatar} />
+                    <View style={styles.discussionInfo}>
+                      <Text style={styles.discussionAuthor}>
+                        {isOwner ? 'You' : discussion.owner.name}
+                      </Text>
+                      <Text style={styles.discussionTime}>{getTimeAgo(discussion.created_at)}</Text>
+                    </View>
+                    
+                    {category && (
+                      <View style={[
+                        styles.discussionTag,
+                        { backgroundColor: category.color }
+                      ]}>
+                        <Text style={styles.discussionTagEmoji}>{category.emoji}</Text>
+                        <Text style={styles.discussionTagText}>{category.label}</Text>
+                      </View>
+                    )}
+                    
+                    {/* 3-dot menu */}
+                    <TouchableOpacity 
+                      style={styles.discussionMenuButton}
+                      onPress={() => toggleDropdown(discussion.id)}
+                    >
+                      <Entypo name="dots-three-horizontal" size={16} color="#666" />
+                    </TouchableOpacity>
+                    
+                    {/* Dropdown Menu */}
+                    {dropdownMenus[discussion.id] && (
+                      <View style={styles.dropdownMenu}>
+                        {isOwner && (
+                          <>
+                            <TouchableOpacity 
+                              style={styles.dropdownItem}
+                              onPress={() => handleDropdownAction('delete', discussion.id)}
+                            >
+                              <Text style={styles.dropdownItemText}>Delete</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                              style={styles.dropdownItem}
+                              onPress={() => handleDropdownAction('edit', discussion.id)}
+                            >
+                              <Text style={styles.dropdownItemText}>Edit</Text>
+                            </TouchableOpacity>
+                          </>
+                        )}
+                        <TouchableOpacity 
+                          style={styles.dropdownItem}
+                          onPress={() => handleDropdownAction('share', discussion.id)}
+                        >
+                          <Text style={styles.dropdownItemText}>Share</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                  
+                  <Text style={styles.discussionDescription}>{discussion.description}</Text>
+                  
+                  {discussion.image && (
+                    <Image source={discussion.image} style={styles.discussionImage} />
+                  )}
+                  
+                  {/* Interaction counts */}
+                  <View style={styles.discussionStats}>
+                    <View style={styles.discussionStat}>
+                      <Ionicons name="heart-outline" size={12} color="#35303D" />
+                      <Text style={styles.discussionStatText}>{discussion.reactions?.length || 0}</Text>
+                    </View>
+                    <View style={styles.discussionStat}>
+                      <Ionicons name="chatbubble-outline" size={12} color="#35303D" />
+                      <Text style={styles.discussionStatText}>{discussion.comments?.length || 0}</Text>
+                    </View>
+                    <View style={styles.discussionStat}>
+                      <Ionicons name="share-outline" size={12} color="#35303D" />
+                      <Text style={styles.discussionStatText}>{discussion.shares?.length || 0}</Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-              
-              <Text style={styles.discussionMessage}>
-                This is a sample discussion post to demonstrate the scrolling behavior.
-              </Text>
-              
-              <TouchableOpacity style={styles.postButton}>
-                <Text style={styles.postButtonText}>Post</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+              );
+            })}
         </View>
         
         </View>
@@ -438,6 +822,17 @@ const HomescreenHomeScreen = () => {
         visible={showAttendingModal}
         onClose={() => setShowAttendingModal(false)}
         ownerName={selectedShoutoutOwner}
+      />
+      
+      {/* Category Selection Modal */}
+      <CategorySelectionModal
+        visible={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        selectedCategory={null}
+        onSelectCategory={(categoryId) => {
+          handleCategorySelect(categoryId);
+          setShowCategoryModal(false);
+        }}
       />
     </SafeAreaView>
   );
@@ -837,73 +1232,184 @@ const styles = StyleSheet.create({
     maxWidth: 195,
   },
   discussionSection: {
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  discussionSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    gap: 15,
+  },
+  discussionSectionTitle: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#35303D',
+  },
+  categoriesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(53,48,61,0.8)',
+    gap: 9,
+  },
+  categoriesButtonText: {
+    fontSize: 14,
+    color: '#35303D',
+  },
+  categoryPillsContainer: {
+    marginBottom: 15,
+    maxHeight: 30,
+  },
+  categoryPillsContent: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    borderRadius: 30,
+    marginRight: 8,
+    borderWidth: 0.5,
+    borderColor: 'rgba(53,48,61,0.8)',
+    minHeight: 30,
+    maxHeight: 30,
+  },
+  selectedCategoryPill: {
+    paddingRight: 6,
+  },
+  categoryPillEmoji: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  categoryPillText: {
+    fontSize: 12,
+    color: '#35303D',
+  },
+  categoryPillCloseContainer: {
+    marginLeft: 4,
   },
   discussionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
     marginBottom: 15,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   discussionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+    position: 'relative',
   },
   discussionAvatar: {
-    width: 35,
-    height: 35,
+    width: 36,
+    height: 36,
     borderRadius: 18,
     backgroundColor: '#35303D',
     marginRight: 10,
   },
-  discussionAuthor: {
-    fontSize: 12,
-    color: 'rgba(53, 48, 61, 0.8)',
+  discussionInfo: {
     flex: 1,
+  },
+  discussionAuthor: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#35303D',
+    marginBottom: 2,
+  },
+  discussionTime: {
+    fontSize: 11,
+    color: 'rgba(53, 48, 61, 0.6)',
   },
   discussionTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 17,
-    borderWidth: 0.3,
-    borderColor: 'rgba(53, 48, 61, 0.8)',
-    gap: 3,
+    borderRadius: 20,
+    borderWidth: 0.5,
+    borderColor: 'rgba(53, 48, 61, 0.2)',
+    marginRight: 8,
   },
-  tagIcon: {
-    width: 8,
-    height: 8,
+  discussionTagEmoji: {
+    fontSize: 10,
+    marginRight: 3,
   },
-  tagText: {
-    fontSize: 7,
+  discussionTagText: {
+    fontSize: 10,
     color: '#35303D',
   },
-  discussionMessage: {
+  discussionMenuButton: {
+    padding: 5,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    right: 0,
+    top: 25,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,
+    minWidth: 120,
+    zIndex: 1000,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  dropdownItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  dropdownItemText: {
     fontSize: 14,
     color: '#35303D',
-    lineHeight: 18,
-    marginBottom: 15,
   },
-  postButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#CACDFF',
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    borderRadius: 30,
+  discussionDescription: {
+    fontSize: 14,
+    color: '#35303D',
+    lineHeight: 20,
+    marginBottom: 10,
   },
-  postButtonText: {
+  discussionImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  discussionStats: {
+    flexDirection: 'row',
+    gap: 20,
+    marginTop: 12,
+  },
+  discussionStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  discussionStatText: {
     fontSize: 12,
-    color: 'rgba(53, 48, 61, 0.8)',
+    color: '#35303D',
+    letterSpacing: -0.24,
   },
 });
 
