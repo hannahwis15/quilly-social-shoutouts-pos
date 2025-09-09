@@ -15,9 +15,11 @@ const DiscussionCard = ({
   isOwner, 
   onDropdownAction,
   currentUserId,
-  onReactionToggle 
+  onReactionToggle,
+  navigation 
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [expandedComments, setExpandedComments] = useState({});
   
   // Check if current user has reacted
   const hasUserReacted = discussion.reactions?.some(reaction => reaction.user_id === currentUserId);
@@ -38,6 +40,47 @@ const DiscussionCard = ({
   const handleDropdownAction = (action) => {
     onDropdownAction(action, discussion.id);
     setShowDropdown(false);
+  };
+
+  // Toggle comment expansion
+  const toggleCommentExpansion = (commentId) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [commentId]: !prev[commentId]
+    }));
+  };
+
+  // Navigate to discussion details with serializable data
+  const navigateToDetails = () => {
+    if (navigation) {
+      // Create a serializable version of the discussion object
+      const serializableDiscussion = {
+        ...discussion,
+        owner: {
+          id: discussion.owner?.id,
+          name: discussion.owner?.name,
+          avatar: null // Will be required in DiscussionDetailsScreen
+        },
+        comments: discussion.comments?.map(comment => ({
+          ...comment,
+          owner: comment.owner ? {
+            id: comment.owner.id,
+            name: comment.owner.name,
+            avatar: null
+          } : null,
+          comments: comment.comments?.map(reply => ({
+            ...reply,
+            owner: reply.owner ? {
+              id: reply.owner.id,
+              name: reply.owner.name,
+              avatar: null
+            } : null
+          })) || []
+        })) || [],
+        discussionId: discussion.id // Pass the ID so we can look up the full object if needed
+      };
+      navigation.navigate('DiscussionDetails', { discussion: serializableDiscussion });
+    }
   };
 
   return (
@@ -88,7 +131,11 @@ const DiscussionCard = ({
         )}
       </View>
       
-      <Text style={styles.discussionDescription}>{discussion.description}</Text>
+      <TouchableOpacity 
+        onPress={() => navigation && navigation.navigate('DiscussionDetails', { discussion })}
+      >
+        <Text style={styles.discussionDescription}>{discussion.description}</Text>
+      </TouchableOpacity>
       
       {discussion.image && (
         <Image source={discussion.image} style={styles.discussionImage} />
@@ -130,6 +177,125 @@ const DiscussionCard = ({
           </View>
         )}
       </View>
+      
+      {/* Comments Preview Section */}
+      {discussion.comments && discussion.comments.length > 0 && (() => {
+        // Check if any comments have replies
+        const hasAnyReplies = discussion.comments.some(comment => 
+          comment.comments && comment.comments.length > 0
+        );
+        
+        return (
+          <View style={styles.commentsSection}>
+            {discussion.comments.slice(0, 3).map((comment, index) => {
+              // Skip if comment doesn't have proper structure
+              if (!comment.owner || !comment.description) return null;
+              
+              const hasReplies = comment.comments && comment.comments.length > 0;
+              
+              return (
+                <View key={comment.id}>
+                  <View style={styles.commentPreview}>
+                    {/* Thread line for first comment with replies */}
+                    {index === 0 && hasReplies && <View style={styles.threadLine} />}
+                    
+                    <Image 
+                      source={comment.owner.avatar || require('../assets/images/Avatar.png')} 
+                      style={styles.commentAvatar} 
+                    />
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeader}>
+                        <Text style={styles.commentAuthor}>{comment.owner.name}</Text>
+                        {comment.owner.id === discussion.owner.id && (
+                          <View style={styles.authorBadge}>
+                            <Text style={styles.authorBadgeText}>Author</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.commentText} numberOfLines={2}>
+                        {comment.description}
+                      </Text>
+                      
+                      {/* Comment Stats */}
+                      <View style={styles.commentStats}>
+                        <View style={styles.commentStat}>
+                          <Ionicons name="chatbubble-outline" size={9} color={Colors.primary} />
+                          <Text style={styles.commentStatText}>{comment.comments?.length || 0}</Text>
+                        </View>
+                        <View style={styles.commentStat}>
+                          <Ionicons name="heart-outline" size={9} color={Colors.primary} />
+                          <Text style={styles.commentStatText}>{comment.reactions?.length || 0}</Text>
+                        </View>
+                        {comment.shares && comment.shares.length > 0 && (
+                          <View style={styles.commentStat}>
+                            <Ionicons name="share-outline" size={9} color={Colors.primary} />
+                            <Text style={styles.commentStatText}>{comment.shares.length}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    <TouchableOpacity style={styles.commentMenuButton}>
+                      <Entypo name="dots-three-horizontal" size={14} color="#666" />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  {/* Show first reply if this is the first comment and it has replies */}
+                  {index === 0 && hasReplies && comment.comments[0] && (
+                    <View style={styles.repliesContainer}>
+                      <View style={styles.replyPreview}>
+                        <View style={styles.replyConnector} />
+                        <Image 
+                          source={comment.comments[0].owner?.avatar || require('../assets/images/Avatar.png')} 
+                          style={styles.replyAvatar} 
+                        />
+                        <View style={styles.replyContent}>
+                          <View style={styles.commentHeader}>
+                            <Text style={styles.replyAuthor}>
+                              {comment.comments[0].owner?.name || 'User'}
+                            </Text>
+                            {comment.comments[0].owner?.id === discussion.owner.id && (
+                              <View style={styles.authorBadge}>
+                                <Text style={styles.authorBadgeText}>Author</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.replyText} numberOfLines={1}>
+                            {comment.comments[0].description}
+                          </Text>
+                          <View style={styles.commentStats}>
+                            <View style={styles.commentStat}>
+                              <Ionicons name="chatbubble-outline" size={9} color={Colors.primary} />
+                              <Text style={styles.commentStatText}>
+                                {comment.comments[0].comments?.length || 0}
+                              </Text>
+                            </View>
+                            <View style={styles.commentStat}>
+                              <Ionicons name="heart-outline" size={9} color={Colors.primary} />
+                              <Text style={styles.commentStatText}>
+                                {comment.comments[0].reactions?.length || 0}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+            
+            {/* Show replies link at the bottom */}
+            {hasAnyReplies && (
+              <TouchableOpacity 
+                style={styles.showRepliesButton}
+                onPress={navigateToDetails}
+              >
+                <Text style={styles.showRepliesText}>Show replies</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+      })()}
     </View>
   );
 };
@@ -246,6 +412,127 @@ const styles = StyleSheet.create({
   discussionTagText: {
     fontSize: 8,
     color: '#35303D',
+  },
+  commentsSection: {
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.grayBorder,
+  },
+  commentPreview: {
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+    position: 'relative',
+  },
+  threadLine: {
+    position: 'absolute',
+    left: 16,
+    top: 38,
+    height: 70,
+    width: 1,
+    backgroundColor: '#D8D8D8',
+  },
+  commentAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    marginRight: Spacing.sm,
+  },
+  commentContent: {
+    flex: 1,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: 2,
+  },
+  commentAuthor: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.primaryLight,
+  },
+  authorBadge: {
+    backgroundColor: '#EEEEEE',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 15,
+  },
+  authorBadgeText: {
+    fontSize: 10,
+    color: Colors.primaryLight,
+  },
+  commentText: {
+    fontSize: 12,
+    color: Colors.primaryLight,
+    lineHeight: 14,
+    marginBottom: 4,
+  },
+  commentStats: {
+    flexDirection: 'row',
+    gap: Spacing.lg,
+    marginTop: 4,
+  },
+  commentStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  commentStatText: {
+    fontSize: 10,
+    color: Colors.primary,
+  },
+  commentMenuButton: {
+    padding: 4,
+  },
+  repliesContainer: {
+    marginLeft: 40,
+    marginBottom: Spacing.sm,
+  },
+  replyPreview: {
+    flexDirection: 'row',
+    marginBottom: Spacing.xs,
+    position: 'relative',
+  },
+  replyConnector: {
+    position: 'absolute',
+    left: -24,
+    top: 16,
+    width: 20,
+    height: 1,
+    backgroundColor: Colors.grayBorder,
+  },
+  replyAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    marginRight: Spacing.xs,
+  },
+  replyContent: {
+    flex: 1,
+  },
+  replyAuthor: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: Colors.primaryLight,
+  },
+  replyText: {
+    fontSize: 11,
+    color: Colors.primaryLight,
+    lineHeight: 13,
+    marginBottom: 2,
+  },
+  showRepliesButton: {
+    marginLeft: 40,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs,
+  },
+  showRepliesText: {
+    fontSize: 12,
+    color: '#A68CD1',
+    textDecorationLine: 'underline',
   },
 });
 

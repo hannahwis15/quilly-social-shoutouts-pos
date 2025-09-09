@@ -27,7 +27,7 @@ const HEADER_MAX_HEIGHT = 311;
 const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 164 : 144;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-const HomescreenHomeScreen = () => {
+const HomescreenHomeScreen = ({ navigation }) => {
   const [shoutoutText, setShoutoutText] = useState('');
   const [showPostModal, setShowPostModal] = useState(false);
   const [showAttendingModal, setShowAttendingModal] = useState(false);
@@ -158,36 +158,64 @@ const HomescreenHomeScreen = () => {
         { id: 12, user_id: 'user110', type: 'heart' }
       ],
       comments: [
-        { id: 1, user_id: 'user201', text: 'Try the library cafe!' },
-        { id: 2, user_id: 'user202', text: 'Starbucks on 5th is quiet' },
-        { id: 3, user_id: 'user203', text: 'The study lounge is great' },
-        { id: 4, user_id: 'user204', text: 'Coffee Bean has good spots' },
-        { id: 5, user_id: 'user205', text: 'Try the quiet floor in the library' },
-        { id: 6, user_id: 'user206', text: 'There is a nice cafe near campus' },
-        { id: 7, user_id: 'user207', text: 'I know a good place!' },
-        { id: 8, user_id: 'user208', text: 'The student center has quiet areas' },
-        { id: 9, user_id: 'user209', text: 'Try the bookstore cafe' },
-        { id: 10, user_id: 'user210', text: 'The park nearby is peaceful' },
-        { id: 11, user_id: 'user211', text: 'Second floor of the science building' },
-        { id: 12, user_id: 'user212', text: 'The courtyard is nice' },
-        { id: 13, user_id: 'user213', text: 'Try early mornings at any cafe' },
-        { id: 14, user_id: 'user214', text: 'The east wing is usually empty' },
-        { id: 15, user_id: 'user215', text: 'I study at home' },
-        { id: 16, user_id: 'user216', text: 'The music building has quiet rooms' },
-        { id: 17, user_id: 'user217', text: 'Try the graduate lounge' },
-        { id: 18, user_id: 'user218', text: 'The rooftop garden is amazing' },
-        { id: 19, user_id: 'user219', text: 'Near the fountain is quiet' },
-        { id: 20, user_id: 'user220', text: 'The old library building' },
-        { id: 21, user_id: 'user221', text: 'Study rooms can be booked' },
-        { id: 22, user_id: 'user222', text: 'The basement level is quiet' },
-        { id: 23, user_id: 'user223', text: 'Try the medical library' },
-        { id: 24, user_id: 'user224', text: 'The law library allows guests' },
-        { id: 25, user_id: 'user225', text: 'Art building has nice spaces' },
-        { id: 26, user_id: 'user226', text: 'The chapel is peaceful' },
-        { id: 27, user_id: 'user227', text: 'Computer lab after hours' },
-        { id: 28, user_id: 'user228', text: 'The archives room' },
-        { id: 29, user_id: 'user229', text: 'Faculty lounge if you have access' },
-        { id: 30, user_id: 'user230', text: 'Great suggestions everyone!' }
+        {
+          id: 'comment1',
+          owner: { 
+            id: 'user456', 
+            name: 'Cass P.', 
+            avatar: require('../assets/images/Avatar.png') 
+          },
+          description: 'I heard something library allows drinks and no one is ever there!',
+          created_at: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
+          reactions: [
+            { id: 'r1', user_id: 'user789', type: 'heart' },
+            { id: 'r2', user_id: 'user101', type: 'heart' },
+            { id: 'r3', user_id: 'user102', type: 'heart' },
+            { id: 'r4', user_id: 'user103', type: 'heart' },
+            { id: 'r5', user_id: 'user104', type: 'heart' },
+            { id: 'r6', user_id: 'user105', type: 'heart' },
+            { id: 'r7', user_id: 'user106', type: 'heart' },
+            { id: 'r8', user_id: 'user107', type: 'heart' },
+            { id: 'r9', user_id: 'user108', type: 'heart' },
+            { id: 'r10', user_id: 'user109', type: 'heart' },
+            { id: 'r11', user_id: 'user110', type: 'heart' },
+            { id: 'r12', user_id: 'user111', type: 'heart' },
+            { id: 'r13', user_id: 'user112', type: 'heart' },
+            { id: 'r14', user_id: 'user113', type: 'heart' }
+          ],
+          shares: [],
+          comments: [
+            {
+              id: 'reply1',
+              owner: { 
+                id: 'user789', 
+                name: 'Lily A.', 
+                avatar: require('../assets/images/Avatar.png') 
+              },
+              description: 'Which library is this?',
+              created_at: new Date(Date.now() - 1 * 60 * 60 * 1000),
+              reactions: [],
+              comments: [],
+              shares: [],
+            }
+          ]
+        },
+        {
+          id: 'comment2',
+          owner: { 
+            id: 'user789', 
+            name: 'Lily A.', 
+            avatar: require('../assets/images/Avatar.png') 
+          },
+          description: 'Oooo Sounds good, I\'ll check it out! :)',
+          created_at: new Date(Date.now() - 30 * 60 * 1000),
+          reactions: [
+            { id: 'r15', user_id: 'user456', type: 'heart' },
+            { id: 'r16', user_id: 'user101', type: 'heart' },
+          ],
+          shares: [],
+          comments: []
+        }
       ],
       shares: [
         { id: 1, user_id: 'user301', shared_at: new Date() },
@@ -763,6 +791,7 @@ const HomescreenHomeScreen = () => {
                   currentUserId={currentUserId}
                   onDropdownAction={handleDropdownAction}
                   onReactionToggle={handleReactionToggle}
+                  navigation={navigation}
                 />
               );
             });

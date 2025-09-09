@@ -14,7 +14,7 @@ import DiscussionCard from '../components/DiscussionCard';
 import CategorySelectionModal from '../components/CategorySelectionModal';
 import { CATEGORY_GROUPS } from '../config/categories';
 
-const DiscussionsScreen = () => {
+const DiscussionsScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('discussions'); // 'discussions' or 'myDiscussions'
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -270,6 +270,7 @@ const DiscussionsScreen = () => {
               currentUserId={currentUserId}
               onDropdownAction={handleDropdownAction}
               onReactionToggle={handleReactionToggle}
+              navigation={navigation}
             />
           );
         })}

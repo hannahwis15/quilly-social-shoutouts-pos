@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import HomescreenHomeScreen from './screens/HomescreenHomeScreen';
 import DiscussionsScreen from './screens/DiscussionsScreen';
+import DiscussionDetailsScreen from './screens/DiscussionDetailsScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
 import PostCreationModal from './components/PostCreationModal';
 
@@ -79,6 +80,29 @@ function HomeStack() {
         name="ShoutoutDetail" 
         component={ShoutoutDetailScreen} 
         options={{ title: 'Details' }}
+      />
+      <Stack.Screen 
+        name="DiscussionDetails" 
+        component={DiscussionDetailsScreen} 
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Discussions Stack Navigator
+function DiscussionsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="DiscussionsScreen" 
+        component={DiscussionsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="DiscussionDetails" 
+        component={DiscussionDetailsScreen} 
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -195,7 +219,7 @@ function TabNavigator() {
         />
         <Tab.Screen 
           name="Messages" 
-          component={DiscussionsScreen}
+          component={DiscussionsStack}
         />
         <Tab.Screen 
           name="Create" 
