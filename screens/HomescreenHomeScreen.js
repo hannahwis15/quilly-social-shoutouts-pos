@@ -62,7 +62,7 @@ const HomescreenHomeScreen = () => {
 
   const shareCardTranslate = scrollY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE],
-    outputRange: [0, -HEADER_SCROLL_DISTANCE + 70],
+    outputRange: [0, -HEADER_SCROLL_DISTANCE - 10],
     extrapolate: 'clamp',
   });
 
