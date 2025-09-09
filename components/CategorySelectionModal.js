@@ -12,18 +12,42 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { CATEGORY_GROUPS } from '../config/categories';
 
-const CategorySelectionModal = ({ visible, onClose, selectedCategory, onSelectCategory }) => {
-  const [tempSelected, setTempSelected] = useState(selectedCategory);
+const CategorySelectionModal = ({ visible, onClose, selectedCategories = [], onSelectCategory, maxSelections = 2 }) => {
+  const [tempSelected, setTempSelected] = useState(selectedCategories);
+
+  React.useEffect(() => {
+    setTempSelected(selectedCategories);
+  }, [selectedCategories]);
 
   const handleSave = () => {
-    if (tempSelected) {
-      onSelectCategory(tempSelected);
-    }
+    // Apply all selected categories
+    tempSelected.forEach(categoryId => {
+      if (!selectedCategories.includes(categoryId)) {
+        onSelectCategory(categoryId);
+      }
+    });
+    // Remove deselected categories
+    selectedCategories.forEach(categoryId => {
+      if (!tempSelected.includes(categoryId)) {
+        onSelectCategory(categoryId); // This will toggle it off
+      }
+    });
     onClose();
   };
 
   const handleCategoryPress = (categoryId) => {
-    setTempSelected(categoryId);
+    setTempSelected(prev => {
+      if (prev.includes(categoryId)) {
+        // Remove if already selected
+        return prev.filter(id => id !== categoryId);
+      }
+      // Add if not selected and under limit
+      if (prev.length >= maxSelections) {
+        // Can't add more, reached limit
+        return prev;
+      }
+      return [...prev, categoryId];
+    });
   };
 
   return (
@@ -38,7 +62,8 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategory, onSelectCa
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerTitleContainer}>
-              <Text style={styles.headerTitle}>Discussion Category</Text>
+              <Text style={styles.headerTitle}>Discussion Categories</Text>
+              <Text style={styles.headerSubtitle}>(Select up to 2)</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={28} color="#666666" />
@@ -58,9 +83,11 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategory, onSelectCa
                 <Text style={styles.groupTitle}>{group.label}</Text>
                 <View style={styles.categoriesContainer}>
                   {group.categories.map((category) => {
-                    const isSelected = tempSelected === category.id;
+                    const isSelected = tempSelected.includes(category.id);
+                    const isDisabled = !isSelected && tempSelected.length >= maxSelections;
                     const backgroundColor = isSelected ? category.color : 'rgba(255,255,255,0.8)';
                     const borderColor = isSelected ? 'rgba(53,48,61,0.8)' : 'rgba(53,48,61,0.3)';
+                    const opacity = isDisabled ? 0.5 : 1;
                     
                     return (
                       <TouchableOpacity
@@ -71,14 +98,19 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategory, onSelectCa
                             backgroundColor,
                             borderColor,
                             borderWidth: 0.5,
+                            opacity,
                           }
                         ]}
-                        onPress={() => handleCategoryPress(category.id)}
+                        onPress={() => !isDisabled && handleCategoryPress(category.id)}
+                        disabled={isDisabled}
                       >
                         <Text style={styles.categoryEmoji}>{category.emoji}</Text>
                         <Text style={styles.categoryLabel}>
                           {category.label}
                         </Text>
+                        {isSelected && (
+                          <Ionicons name="checkmark-circle" size={16} color="rgba(53,48,61,0.8)" style={styles.checkIcon} />
+                        )}
                       </TouchableOpacity>
                     );
                   })}
@@ -90,11 +122,11 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategory, onSelectCa
           {/* Footer with Save Button */}
           <View style={styles.footer}>
             <TouchableOpacity 
-              style={[styles.saveButton, !tempSelected && styles.saveButtonDisabled]}
+              style={[styles.saveButton, tempSelected.length === 0 && styles.saveButtonDisabled]}
               onPress={handleSave}
-              disabled={!tempSelected}
+              disabled={tempSelected.length === 0}
             >
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>Save ({tempSelected.length}/2)</Text>
             </TouchableOpacity>
           </View>
 
@@ -139,6 +171,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#35303D',
     letterSpacing: -0.32,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(53,48,61,0.6)',
+    marginTop: 2,
   },
   closeButton: {
     padding: 5,
@@ -189,6 +226,9 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 12,
     color: '#35303D',
+  },
+  checkIcon: {
+    marginLeft: 4,
   },
   footer: {
     paddingHorizontal: 25,

@@ -204,7 +204,7 @@ const HomescreenHomeScreen = () => {
       created_at: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
       description: "Looking for recommendations on the best coffee shops around campus!",
       category: 'food',
-      image: null,
+      image: require('../assets/images/Rectangle200.png'),
       reactions: [
         { id: 1, user_id: 'user401', type: 'heart' },
         { id: 2, user_id: 'user402', type: 'heart' },
@@ -361,11 +361,17 @@ const HomescreenHomeScreen = () => {
     setDropdownMenus(prev => ({ ...prev, [discussionId]: false }));
   };
   
-  // Handle category selection
+  // Handle category selection (max 2 categories)
   const handleCategorySelect = (categoryId) => {
     setSelectedCategories(prev => {
       if (prev.includes(categoryId)) {
+        // Remove if already selected
         return prev.filter(id => id !== categoryId);
+      }
+      // Add new category, but limit to 2 max
+      if (prev.length >= 2) {
+        // Replace the oldest category with the new one
+        return [prev[1], categoryId];
       }
       return [...prev, categoryId];
     });
@@ -659,59 +665,37 @@ const HomescreenHomeScreen = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Category Filter Pills - Horizontal Scrolling */}
-          <ScrollView 
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoryPillsContainer}
-            contentContainerStyle={styles.categoryPillsContent}
-          >
-            {/* Show selected categories first if any */}
-            {selectedCategories.length > 0 ? (
-              selectedCategories.map(categoryId => {
+          {/* Category Filter Pills */}
+          {selectedCategories.length > 0 && (
+            <View style={styles.categoryPillsContainer}>
+              {selectedCategories.slice(0, 2).map(categoryId => {
                 const category = getCategoryById(categoryId);
                 if (!category) return null;
                 
                 return (
-                  <TouchableOpacity
+                  <View
                     key={categoryId}
                     style={[
                       styles.categoryPill,
-                      styles.selectedCategoryPill,
                       { backgroundColor: category.color }
                     ]}
-                    onPress={() => removeCategoryFilter(categoryId)}
                   >
                     <Text style={styles.categoryPillEmoji}>{category.emoji}</Text>
                     <Text style={styles.categoryPillText}>{category.label}</Text>
-                    <View style={styles.categoryPillCloseContainer}>
-                      <Ionicons name="close-circle" size={13} color="#35303D" />
-                    </View>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.categoryPillCloseButton}
+                      onPress={() => removeCategoryFilter(categoryId)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <View style={styles.categoryPillCloseCircle}>
+                        <Ionicons name="close" size={10} color="#35303D" />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 );
-              })
-            ) : (
-              /* Show some default popular categories when none selected */
-              [
-                { id: 'dating', emoji: '🌹', label: 'Dating', color: '#FFD6E0' },
-                { id: 'housing', emoji: '🏠', label: 'Housing', color: '#E8F4FD' },
-                { id: 'food', emoji: '🍔', label: 'Food', color: '#FFF4E6' },
-                { id: 'hobbies', emoji: '🎨', label: 'Hobbies', color: '#F0E6FF' }
-              ].map(category => (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    styles.categoryPill,
-                    { backgroundColor: 'rgba(255,255,255,0.8)' }
-                  ]}
-                  onPress={() => handleCategorySelect(category.id)}
-                >
-                  <Text style={styles.categoryPillEmoji}>{category.emoji}</Text>
-                  <Text style={styles.categoryPillText}>{category.label}</Text>
-                </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
+              })}
+            </View>
+          )}
           
           {/* Discussion Cards */}
           {discussions
@@ -733,16 +717,6 @@ const HomescreenHomeScreen = () => {
                       </Text>
                       <Text style={styles.discussionTime}>{getTimeAgo(discussion.created_at)}</Text>
                     </View>
-                    
-                    {category && (
-                      <View style={[
-                        styles.discussionTag,
-                        { backgroundColor: category.color }
-                      ]}>
-                        <Text style={styles.discussionTagEmoji}>{category.emoji}</Text>
-                        <Text style={styles.discussionTagText}>{category.label}</Text>
-                      </View>
-                    )}
                     
                     {/* 3-dot menu */}
                     <TouchableOpacity 
@@ -787,20 +761,32 @@ const HomescreenHomeScreen = () => {
                     <Image source={discussion.image} style={styles.discussionImage} />
                   )}
                   
-                  {/* Interaction counts */}
-                  <View style={styles.discussionStats}>
-                    <View style={styles.discussionStat}>
-                      <Ionicons name="heart-outline" size={12} color="#35303D" />
-                      <Text style={styles.discussionStatText}>{discussion.reactions?.length || 0}</Text>
+                  {/* Interaction counts and category tag */}
+                  <View style={styles.discussionFooter}>
+                    <View style={styles.discussionStats}>
+                      <View style={styles.discussionStat}>
+                        <Ionicons name="heart-outline" size={12} color="#35303D" />
+                        <Text style={styles.discussionStatText}>{discussion.reactions?.length || 0}</Text>
+                      </View>
+                      <View style={styles.discussionStat}>
+                        <Ionicons name="chatbubble-outline" size={12} color="#35303D" />
+                        <Text style={styles.discussionStatText}>{discussion.comments?.length || 0}</Text>
+                      </View>
+                      <View style={styles.discussionStat}>
+                        <Ionicons name="share-outline" size={12} color="#35303D" />
+                        <Text style={styles.discussionStatText}>{discussion.shares?.length || 0}</Text>
+                      </View>
                     </View>
-                    <View style={styles.discussionStat}>
-                      <Ionicons name="chatbubble-outline" size={12} color="#35303D" />
-                      <Text style={styles.discussionStatText}>{discussion.comments?.length || 0}</Text>
-                    </View>
-                    <View style={styles.discussionStat}>
-                      <Ionicons name="share-outline" size={12} color="#35303D" />
-                      <Text style={styles.discussionStatText}>{discussion.shares?.length || 0}</Text>
-                    </View>
+                    
+                    {category && (
+                      <View style={[
+                        styles.discussionTag,
+                        { backgroundColor: 'rgba(255,255,255,0.8)' }
+                      ]}>
+                        <Text style={styles.discussionTagEmoji}>{category.emoji}</Text>
+                        <Text style={styles.discussionTagText}>{category.label}</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               );
@@ -828,11 +814,9 @@ const HomescreenHomeScreen = () => {
       <CategorySelectionModal
         visible={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}
-        selectedCategory={null}
-        onSelectCategory={(categoryId) => {
-          handleCategorySelect(categoryId);
-          setShowCategoryModal(false);
-        }}
+        selectedCategories={selectedCategories}
+        onSelectCategory={handleCategorySelect}
+        maxSelections={2}
       />
     </SafeAreaView>
   );
@@ -1263,38 +1247,42 @@ const styles = StyleSheet.create({
     color: '#35303D',
   },
   categoryPillsContainer: {
-    marginBottom: 15,
-    maxHeight: 30,
-  },
-  categoryPillsContent: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
-    gap: 8,
+    marginBottom: 15,
+    gap: 10,
   },
   categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingLeft: 8,
+    paddingRight: 4,
     paddingVertical: 7,
     borderRadius: 30,
-    marginRight: 8,
     borderWidth: 0.5,
     borderColor: 'rgba(53,48,61,0.8)',
     minHeight: 30,
     maxHeight: 30,
   },
-  selectedCategoryPill: {
-    paddingRight: 6,
-  },
   categoryPillEmoji: {
     fontSize: 14,
-    marginRight: 6,
+    marginRight: 4,
   },
   categoryPillText: {
     fontSize: 12,
     color: '#35303D',
+    marginRight: 6,
   },
-  categoryPillCloseContainer: {
-    marginLeft: 4,
+  categoryPillCloseButton: {
+    padding: 2,
+  },
+  categoryPillCloseCircle: {
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    backgroundColor: 'rgba(53,48,61,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   discussionCard: {
     backgroundColor: '#FFFFFF',
@@ -1334,22 +1322,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(53, 48, 61, 0.6)',
   },
+  discussionFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
   discussionTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 0.5,
-    borderColor: 'rgba(53, 48, 61, 0.2)',
-    marginRight: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 21,
+    borderWidth: 0.35,
+    borderColor: 'rgba(53, 48, 61, 0.8)',
+    maxHeight: 21,
   },
   discussionTagEmoji: {
     fontSize: 10,
-    marginRight: 3,
+    marginRight: 2,
   },
   discussionTagText: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#35303D',
   },
   discussionMenuButton: {
@@ -1392,14 +1386,15 @@ const styles = StyleSheet.create({
   },
   discussionImage: {
     width: '100%',
-    height: 180,
-    borderRadius: 8,
+    height: 150,
+    borderRadius: 10,
     marginTop: 10,
+    marginBottom: 10,
+    resizeMode: 'cover',
   },
   discussionStats: {
     flexDirection: 'row',
     gap: 20,
-    marginTop: 12,
   },
   discussionStat: {
     flexDirection: 'row',
