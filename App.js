@@ -14,7 +14,11 @@ import MyDiscussionsScreen from './screens/MyDiscussionsScreen';
 import MyShoutoutsScreen from './screens/MyShoutoutsScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
+import EditProfileModeScreen from './screens/EditProfileModeScreen';
+import PronounsSelectionScreen from './screens/PronounsSelectionScreen';
+import LocationSelectionScreen from './screens/LocationSelectionScreen';
 import LoginScreen from './screens/LoginScreen';
+import MyActivityScreen from './screens/MyActivityScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
 import PostCreationModal from './components/PostCreationModal';
 
@@ -75,6 +79,26 @@ function ProfileStack() {
       <Stack.Screen 
         name="EditProfile" 
         component={EditProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EditProfileMode" 
+        component={EditProfileModeScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="PronounsSelection" 
+        component={PronounsSelectionScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="LocationSelection" 
+        component={LocationSelectionScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="MyActivity" 
+        component={MyActivityScreen} 
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

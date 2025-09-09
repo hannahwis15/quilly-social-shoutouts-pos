@@ -56,7 +56,10 @@ const SettingsScreen = ({ navigation, route }) => {
         contentContainerStyle={styles.scrollContent}
       >
         {/* My Activity Section */}
-        <TouchableOpacity style={styles.sectionCard}>
+        <TouchableOpacity 
+          style={styles.sectionCard}
+          onPress={() => navigation.navigate('MyActivity', { user })}
+        >
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>My Activity</Text>
             <Ionicons name="chevron-forward" size={20} color={Colors.primary} />

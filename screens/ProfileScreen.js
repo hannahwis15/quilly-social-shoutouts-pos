@@ -17,42 +17,6 @@ const ProfileScreen = ({ navigation }) => {
   const [myEventsLoaded, setMyEventsLoaded] = useState(false);
   const [myDiscussionsLoaded, setMyDiscussionsLoaded] = useState(false);
   
-  // Helper function to get point history
-  const getPointHistory = () => {
-    return [
-      {
-        id: 'ph1',
-        description: 'Attended 2 Shoutouts and 1 Hangout this week!',
-        points: 7,
-        date: 'this week',
-      },
-      {
-        id: 'ph2',
-        description: 'Created a Hangout!',
-        points: 5,
-        date: 'Jan 17',
-      },
-      {
-        id: 'ph3',
-        description: 'Cancelled planned events 5 times.',
-        points: -5,
-        date: 'Jan 5-10',
-      },
-      {
-        id: 'ph4',
-        description: 'Created a Shoutout!',
-        points: 3,
-        date: 'Jan 4',
-      },
-      {
-        id: 'ph5',
-        description: 'Posted a Discussion!',
-        points: 2,
-        date: 'Jan 4',
-      },
-    ];
-  };
-  
   // Comprehensive user object structure - in production this would come from context/state/API
   const user = {
     // Basic Information
@@ -90,7 +54,7 @@ const ProfileScreen = ({ navigation }) => {
       id: 'house123',
       name: 'KAHLO HOUSE',
       role: 'member', // 'member', 'admin', 'moderator'
-      joinedDate: new Date('2024-01-15'),
+      joinedDate: '2024-01-15', // Store as string to avoid serialization issues
       totalPoints: 3580,
     },
     
@@ -126,8 +90,8 @@ const ProfileScreen = ({ navigation }) => {
       totalEvents: 7,
       totalComments: 156,
       totalReactions: 89,
-      joinedDate: new Date('2024-01-15'),
-      lastActive: new Date(),
+      joinedDate: '2024-01-15',
+      lastActive: new Date().toISOString(),
     },
     
     // Privacy Settings
@@ -183,6 +147,42 @@ const ProfileScreen = ({ navigation }) => {
     ],
   };
   
+  // Helper function to get point history
+  const getPointHistory = () => {
+    return [
+      {
+        id: 'ph1',
+        description: 'Attended 2 Shoutouts and 1 Hangout this week!',
+        points: 7,
+        date: 'this week',
+      },
+      {
+        id: 'ph2',
+        description: 'Created a Hangout!',
+        points: 5,
+        date: 'Jan 17',
+      },
+      {
+        id: 'ph3',
+        description: 'Cancelled planned events 5 times.',
+        points: -5,
+        date: 'Jan 5-10',
+      },
+      {
+        id: 'ph4',
+        description: 'Created a Shoutout!',
+        points: 3,
+        date: 'Jan 4',
+      },
+      {
+        id: 'ph5',
+        description: 'Posted a Discussion!',
+        points: 2,
+        date: 'Jan 4',
+      },
+    ];
+  };
+  
   // Lazy load functions
   const loadMyEvents = async () => {
     if (!myEventsLoaded) {
@@ -229,7 +229,7 @@ const ProfileScreen = ({ navigation }) => {
           <View style={styles.headerActions}>
             <TouchableOpacity 
               style={styles.actionButton}
-              onPress={() => navigation.navigate('Settings', { user })}
+              onPress={() => navigation.navigate('EditProfileMode', { user })}
             >
               <Feather name="edit-2" size={18} color={Colors.primary} />
             </TouchableOpacity>
