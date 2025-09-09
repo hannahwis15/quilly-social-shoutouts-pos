@@ -31,6 +31,49 @@ const HomescreenHomeScreen = () => {
   const points = 100;
   const housematesCount = "meet my housemates";
   
+  // Sample shoutouts data - replace with actual data from API/state
+  const [shoutouts, setShoutouts] = useState([
+    {
+      id: 1,
+      userName: 'You',
+      userAvatar: require('../assets/images/Avatar.png'),
+      content: 'study date anyone?',
+      timeAgo: '21 min ago',
+      time: '11am',
+      location: 'Glade',
+      attendees: [
+        { avatar: require('../assets/images/Avatar.png') },
+        { avatar: require('../assets/images/Avatar.png') },
+        { avatar: require('../assets/images/Avatar.png') }
+      ]
+    },
+    {
+      id: 2,
+      userName: 'Hannah',
+      userAvatar: require('../assets/images/Avatar.png'),
+      content: "let's grab coffee!",
+      timeAgo: '45 min ago',
+      time: '2pm',
+      location: 'Campus Cafe',
+      attendees: [
+        { avatar: require('../assets/images/Avatar.png') },
+        { avatar: require('../assets/images/Avatar.png') }
+      ]
+    },
+    {
+      id: 3,
+      userName: 'Lily',
+      userAvatar: require('../assets/images/Avatar.png'),
+      content: 'need more players for volleyball!',
+      timeAgo: '1 hr ago',
+      time: '12pm',
+      location: 'Main Gym',
+      attendees: [
+        { avatar: require('../assets/images/Avatar.png') }
+      ]
+    }
+  ]);
+  
   const discussions = [
     {
       id: 1,
@@ -200,14 +243,81 @@ const HomescreenHomeScreen = () => {
             </TouchableOpacity>
           </View>
           
-          <View style={styles.noMeetupsContainer}>
-            {/* Sleep Icon Placeholder - Replace with actual icon */}
-            <View style={[styles.sleepIcon, {backgroundColor: '#E5CFFF', borderRadius: 22}]} />
-            <Text style={styles.noMeetupsText}>No Meetups Yet!</Text>
-            <Text style={styles.noMeetupsSubtext}>
-              Not sure what to shout-out? Try out one of these:
-            </Text>
-          </View>
+          {/* Conditional rendering based on shoutouts */}
+          {shoutouts && shoutouts.length > 0 ? (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.shoutoutsScrollContainer}
+            >
+              {shoutouts.map((shoutout, index) => (
+                <View key={index} style={styles.shoutoutCard}>
+                  {/* Profile section */}
+                  <View style={styles.shoutoutHeader}>
+                    <Image 
+                      source={shoutout.userAvatar || require('../assets/images/Avatar.png')}
+                      style={styles.shoutoutAvatar}
+                    />
+                    <View style={styles.shoutoutUserInfo}>
+                      <Text style={styles.shoutoutUserName}>{shoutout.userName || 'You'}</Text>
+                      <Text style={styles.shoutoutTime}>{shoutout.timeAgo || '21 min ago'}</Text>
+                    </View>
+                    {/* Attendees avatars */}
+                    {shoutout.attendees && shoutout.attendees.length > 0 && (
+                      <View style={styles.attendeesContainer}>
+                        {shoutout.attendees.slice(0, 3).map((attendee, idx) => (
+                          <Image 
+                            key={idx}
+                            source={attendee.avatar}
+                            style={[styles.attendeeAvatar, { marginLeft: idx > 0 ? -8 : 0 }]}
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                  
+                  {/* Shoutout content */}
+                  <Text style={styles.shoutoutContent}>{shoutout.content}</Text>
+                  
+                  {/* Time and location info */}
+                  <View style={styles.shoutoutInfoBox}>
+                    <View style={styles.shoutoutInfoRow}>
+                      <View style={styles.shoutoutInfoItem}>
+                        <Ionicons name="time-outline" size={10} color="rgba(53,48,61,0.8)" />
+                        <Text style={styles.shoutoutInfoText}>{shoutout.time || '11am'}</Text>
+                      </View>
+                      <View style={styles.shoutoutInfoDivider} />
+                      <View style={styles.shoutoutInfoItem}>
+                        <Ionicons name="location-outline" size={10} color="rgba(53,48,61,0.8)" />
+                        <Text style={styles.shoutoutInfoText}>{shoutout.location || 'Glade'}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  
+                  {/* Action buttons */}
+                  <View style={styles.shoutoutActions}>
+                    <TouchableOpacity style={styles.shoutoutActionButton}>
+                      <Ionicons name="trash-outline" size={10} color="rgba(53,48,61,0.8)" />
+                      <Text style={styles.shoutoutActionText}>Delete</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.shoutoutEditButton}>
+                      <Ionicons name="pencil-outline" size={10} color="rgba(53,48,61,0.8)" />
+                      <Text style={styles.shoutoutActionText}>Edit</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.noMeetupsContainer}>
+              {/* Sleep Icon Placeholder - Replace with actual icon */}
+              <View style={[styles.sleepIcon, {backgroundColor: '#E5CFFF', borderRadius: 22}]} />
+              <Text style={styles.noMeetupsText}>No Shoutouts Yet!</Text>
+              <Text style={styles.noMeetupsSubtext}>
+                Not sure what to shout-out? Try out one of these:
+              </Text>
+            </View>
+          )}
         </View>
         
         {/* Discussion Posts */}
@@ -481,6 +591,127 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(53, 48, 61, 0.5)',
     textDecorationLine: 'underline',
+  },
+  shoutoutsScrollContainer: {
+    paddingRight: 20,
+  },
+  shoutoutCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E8E2ED',
+    width: 182,
+    height: 196,
+    marginRight: 15,
+    padding: 14,
+    shadowColor: '#E5CFFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.67,
+    elevation: 3,
+  },
+  shoutoutHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  shoutoutAvatar: {
+    width: 33,
+    height: 33,
+    borderRadius: 16.5,
+    backgroundColor: '#35303D',
+  },
+  shoutoutUserInfo: {
+    marginLeft: 8,
+    flex: 1,
+  },
+  shoutoutUserName: {
+    fontSize: 12,
+    color: '#35303D',
+    fontWeight: '400',
+  },
+  shoutoutTime: {
+    fontSize: 9,
+    color: '#35303D',
+    opacity: 0.7,
+    marginTop: 2,
+  },
+  attendeesContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  attendeeAvatar: {
+    width: 16.5,
+    height: 16.5,
+    borderRadius: 8.25,
+    borderWidth: 0.5,
+    borderColor: '#FFFFFF',
+  },
+  shoutoutContent: {
+    fontSize: 14,
+    color: '#35303D',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  shoutoutInfoBox: {
+    borderWidth: 0.25,
+    borderColor: '#35303D',
+    borderRadius: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginBottom: 12,
+  },
+  shoutoutInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  shoutoutInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  shoutoutInfoText: {
+    fontSize: 10,
+    color: 'rgba(53,48,61,0.8)',
+  },
+  shoutoutInfoDivider: {
+    width: 1,
+    height: 19,
+    backgroundColor: '#35303D',
+    opacity: 0.2,
+  },
+  shoutoutActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    position: 'absolute',
+    bottom: 14,
+    left: 14,
+    right: 14,
+  },
+  shoutoutActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEEEEE',
+    paddingHorizontal: 19,
+    paddingVertical: 8,
+    borderRadius: 30,
+    gap: 7,
+  },
+  shoutoutEditButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEEEEE',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 30,
+    gap: 4,
+  },
+  shoutoutActionText: {
+    fontSize: 12,
+    color: 'rgba(53,48,61,0.8)',
   },
   noMeetupsContainer: {
     backgroundColor: '#FFFFFF',
