@@ -19,6 +19,7 @@ import { Ionicons, Feather, MaterialCommunityIcons, Entypo } from '@expo/vector-
 import PostCreationModal from '../components/PostCreationModal';
 import AttendingConfirmationModal from '../components/AttendingConfirmationModal';
 import CategorySelectionModal from '../components/CategorySelectionModal';
+import DiscussionCard from '../components/DiscussionCard';
 import { CATEGORY_GROUPS } from '../config/categories';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -33,7 +34,6 @@ const HomescreenHomeScreen = () => {
   const [selectedShoutoutOwner, setSelectedShoutoutOwner] = useState('');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [dropdownMenus, setDropdownMenus] = useState({});
   const scrollY = useRef(new Animated.Value(0)).current;
   
   const houseName = "KAHLO HOUSE";
@@ -333,14 +333,6 @@ const HomescreenHomeScreen = () => {
   // Get category info by ID
   const getCategoryById = (categoryId) => {
     return allCategories.find(cat => cat.id === categoryId);
-  };
-  
-  // Toggle dropdown menu for a discussion
-  const toggleDropdown = (discussionId) => {
-    setDropdownMenus(prev => ({
-      ...prev,
-      [discussionId]: !prev[discussionId]
-    }));
   };
   
   // Handle dropdown action
@@ -677,7 +669,7 @@ const HomescreenHomeScreen = () => {
                     key={categoryId}
                     style={[
                       styles.categoryPill,
-                      { backgroundColor: category.color }
+                      { backgroundColor: 'rgba(255,255,255,0.8)' }
                     ]}
                   >
                     <Text style={styles.categoryPillEmoji}>{category.emoji}</Text>
@@ -688,7 +680,7 @@ const HomescreenHomeScreen = () => {
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                       <View style={styles.categoryPillCloseCircle}>
-                        <Ionicons name="close" size={10} color="#35303D" />
+                        <Ionicons name="close" size={10} color="#FFFFFF" />
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -708,87 +700,14 @@ const HomescreenHomeScreen = () => {
               const isOwner = discussion.owner.id === currentUserId;
               
               return (
-                <View key={discussion.id} style={styles.discussionCard}>
-                  <View style={styles.discussionHeader}>
-                    <Image source={discussion.owner.avatar} style={styles.discussionAvatar} />
-                    <View style={styles.discussionInfo}>
-                      <Text style={styles.discussionAuthor}>
-                        {isOwner ? 'You' : discussion.owner.name}
-                      </Text>
-                      <Text style={styles.discussionTime}>{getTimeAgo(discussion.created_at)}</Text>
-                    </View>
-                    
-                    {/* 3-dot menu */}
-                    <TouchableOpacity 
-                      style={styles.discussionMenuButton}
-                      onPress={() => toggleDropdown(discussion.id)}
-                    >
-                      <Entypo name="dots-three-horizontal" size={16} color="#666" />
-                    </TouchableOpacity>
-                    
-                    {/* Dropdown Menu */}
-                    {dropdownMenus[discussion.id] && (
-                      <View style={styles.dropdownMenu}>
-                        {isOwner && (
-                          <>
-                            <TouchableOpacity 
-                              style={styles.dropdownItem}
-                              onPress={() => handleDropdownAction('delete', discussion.id)}
-                            >
-                              <Text style={styles.dropdownItemText}>Delete</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                              style={styles.dropdownItem}
-                              onPress={() => handleDropdownAction('edit', discussion.id)}
-                            >
-                              <Text style={styles.dropdownItemText}>Edit</Text>
-                            </TouchableOpacity>
-                          </>
-                        )}
-                        <TouchableOpacity 
-                          style={styles.dropdownItem}
-                          onPress={() => handleDropdownAction('share', discussion.id)}
-                        >
-                          <Text style={styles.dropdownItemText}>Share</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                  
-                  <Text style={styles.discussionDescription}>{discussion.description}</Text>
-                  
-                  {discussion.image && (
-                    <Image source={discussion.image} style={styles.discussionImage} />
-                  )}
-                  
-                  {/* Interaction counts and category tag */}
-                  <View style={styles.discussionFooter}>
-                    <View style={styles.discussionStats}>
-                      <View style={styles.discussionStat}>
-                        <Ionicons name="heart-outline" size={12} color="#35303D" />
-                        <Text style={styles.discussionStatText}>{discussion.reactions?.length || 0}</Text>
-                      </View>
-                      <View style={styles.discussionStat}>
-                        <Ionicons name="chatbubble-outline" size={12} color="#35303D" />
-                        <Text style={styles.discussionStatText}>{discussion.comments?.length || 0}</Text>
-                      </View>
-                      <View style={styles.discussionStat}>
-                        <Ionicons name="share-outline" size={12} color="#35303D" />
-                        <Text style={styles.discussionStatText}>{discussion.shares?.length || 0}</Text>
-                      </View>
-                    </View>
-                    
-                    {category && (
-                      <View style={[
-                        styles.discussionTag,
-                        { backgroundColor: 'rgba(255,255,255,0.8)' }
-                      ]}>
-                        <Text style={styles.discussionTagEmoji}>{category.emoji}</Text>
-                        <Text style={styles.discussionTagText}>{category.label}</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+                <DiscussionCard
+                  key={discussion.id}
+                  discussion={discussion}
+                  category={category}
+                  isOwner={isOwner}
+                  currentUserId={currentUserId}
+                  onDropdownAction={handleDropdownAction}
+                />
               );
             })}
         </View>
@@ -1283,128 +1202,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(53,48,61,0.8)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  discussionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  discussionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-    position: 'relative',
-  },
-  discussionAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#35303D',
-    marginRight: 10,
-  },
-  discussionInfo: {
-    flex: 1,
-  },
-  discussionAuthor: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#35303D',
-    marginBottom: 2,
-  },
-  discussionTime: {
-    fontSize: 11,
-    color: 'rgba(53, 48, 61, 0.6)',
-  },
-  discussionFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  discussionTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 21,
-    borderWidth: 0.35,
-    borderColor: 'rgba(53, 48, 61, 0.8)',
-    maxHeight: 21,
-  },
-  discussionTagEmoji: {
-    fontSize: 10,
-    marginRight: 2,
-  },
-  discussionTagText: {
-    fontSize: 8,
-    color: '#35303D',
-  },
-  discussionMenuButton: {
-    padding: 5,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  dropdownMenu: {
-    position: 'absolute',
-    right: 0,
-    top: 25,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
-    minWidth: 120,
-    zIndex: 1000,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-  },
-  dropdownItem: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  dropdownItemText: {
-    fontSize: 14,
-    color: '#35303D',
-  },
-  discussionDescription: {
-    fontSize: 14,
-    color: '#35303D',
-    lineHeight: 20,
-    marginBottom: 10,
-  },
-  discussionImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 10,
-    resizeMode: 'cover',
-  },
-  discussionStats: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  discussionStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  discussionStatText: {
-    fontSize: 12,
-    color: '#35303D',
-    letterSpacing: -0.24,
   },
 });
 

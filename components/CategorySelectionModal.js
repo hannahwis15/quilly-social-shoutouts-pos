@@ -85,7 +85,7 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategories = [], onS
                   {group.categories.map((category) => {
                     const isSelected = tempSelected.includes(category.id);
                     const isDisabled = !isSelected && tempSelected.length >= maxSelections;
-                    const backgroundColor = isSelected ? category.color : 'rgba(255,255,255,0.8)';
+                    const backgroundColor = isSelected ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.8)';
                     const borderColor = isSelected ? 'rgba(53,48,61,0.8)' : 'rgba(53,48,61,0.3)';
                     const opacity = isDisabled ? 0.5 : 1;
                     
@@ -109,7 +109,11 @@ const CategorySelectionModal = ({ visible, onClose, selectedCategories = [], onS
                           {category.label}
                         </Text>
                         {isSelected && (
-                          <Ionicons name="checkmark-circle" size={16} color="rgba(53,48,61,0.8)" style={styles.checkIcon} />
+                          <View style={styles.checkContainer}>
+                            <View style={styles.checkCircle}>
+                              <Ionicons name="close" size={10} color="#FFFFFF" />
+                            </View>
+                          </View>
                         )}
                       </TouchableOpacity>
                     );
@@ -227,8 +231,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#35303D',
   },
-  checkIcon: {
+  checkContainer: {
     marginLeft: 4,
+  },
+  checkCircle: {
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    backgroundColor: 'rgba(53,48,61,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footer: {
     paddingHorizontal: 25,

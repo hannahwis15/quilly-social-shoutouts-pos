@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from '
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import HomescreenHomeScreen from './screens/HomescreenHomeScreen';
+import DiscussionsScreen from './screens/DiscussionsScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
 import PostCreationModal from './components/PostCreationModal';
 
@@ -194,7 +195,7 @@ function TabNavigator() {
         />
         <Tab.Screen 
           name="Messages" 
-          component={CreateScreen} // Placeholder - replace with Messages screen
+          component={DiscussionsScreen}
         />
         <Tab.Screen 
           name="Create" 
