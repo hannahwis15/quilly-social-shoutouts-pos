@@ -166,7 +166,7 @@ const HomescreenHomeScreen = () => {
             />
             <TouchableOpacity style={styles.sendButton}>
               <View style={styles.sendButtonCircle}>
-                <MaterialCommunityIcons name="send" size={16} color="#FFFFFF" />
+                <MaterialCommunityIcons name="send" size={16} color="#9599FF" />
               </View>
             </TouchableOpacity>
           </View>
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   houseNameContainer: {
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 18,
     marginBottom: 10,
   },
   headerRow: {
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#9599FF',
+    backgroundColor: '#E5CFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
