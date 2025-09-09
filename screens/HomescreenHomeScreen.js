@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import PostCreationModal from '../components/PostCreationModal';
+import AttendingConfirmationModal from '../components/AttendingConfirmationModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 const HEADER_MAX_HEIGHT = 311;
@@ -25,6 +26,8 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const HomescreenHomeScreen = () => {
   const [shoutoutText, setShoutoutText] = useState('');
   const [showPostModal, setShowPostModal] = useState(false);
+  const [showAttendingModal, setShowAttendingModal] = useState(false);
+  const [selectedShoutoutOwner, setSelectedShoutoutOwner] = useState('');
   const scrollY = useRef(new Animated.Value(0)).current;
   
   const houseName = "KAHLO HOUSE";
@@ -41,6 +44,8 @@ const HomescreenHomeScreen = () => {
       timeAgo: '21 min ago',
       time: '11am',
       location: 'Glade',
+      isOwner: true,
+      attending: false,
       attendees: [
         { avatar: require('../assets/images/Avatar.png') },
         { avatar: require('../assets/images/Avatar.png') },
@@ -55,6 +60,8 @@ const HomescreenHomeScreen = () => {
       timeAgo: '45 min ago',
       time: '2pm',
       location: 'Campus Cafe',
+      isOwner: false,
+      attending: false,
       attendees: [
         { avatar: require('../assets/images/Avatar.png') },
         { avatar: require('../assets/images/Avatar.png') }
@@ -68,11 +75,29 @@ const HomescreenHomeScreen = () => {
       timeAgo: '1 hr ago',
       time: '12pm',
       location: 'Main Gym',
+      isOwner: false,
+      attending: true,
       attendees: [
         { avatar: require('../assets/images/Avatar.png') }
       ]
     }
   ]);
+  
+  const handleAttendToggle = (shoutoutId, ownerName) => {
+    setShoutouts(prevShoutouts => 
+      prevShoutouts.map(shoutout => {
+        if (shoutout.id === shoutoutId) {
+          if (!shoutout.attending) {
+            // Show confirmation modal when attending
+            setSelectedShoutoutOwner(ownerName);
+            setShowAttendingModal(true);
+          }
+          return { ...shoutout, attending: !shoutout.attending };
+        }
+        return shoutout;
+      })
+    );
+  };
   
   const discussions = [
     {
@@ -294,16 +319,49 @@ const HomescreenHomeScreen = () => {
                     </View>
                   </View>
                   
-                  {/* Action buttons */}
+                  {/* Action buttons - conditional based on ownership */}
                   <View style={styles.shoutoutActions}>
-                    <TouchableOpacity style={styles.shoutoutActionButton}>
-                      <Ionicons name="trash-outline" size={10} color="rgba(53,48,61,0.8)" />
-                      <Text style={styles.shoutoutActionText}>Delete</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.shoutoutEditButton}>
-                      <Ionicons name="pencil-outline" size={10} color="rgba(53,48,61,0.8)" />
-                      <Text style={styles.shoutoutActionText}>Edit</Text>
-                    </TouchableOpacity>
+                    {shoutout.isOwner ? (
+                      <>
+                        <TouchableOpacity style={styles.shoutoutActionButton}>
+                          <Ionicons name="trash-outline" size={10} color="rgba(53,48,61,0.8)" />
+                          <Text style={styles.shoutoutActionText}>Delete</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.shoutoutEditButton}>
+                          <Ionicons name="pencil-outline" size={10} color="rgba(53,48,61,0.8)" />
+                          <Text style={styles.shoutoutActionText}>Edit</Text>
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <>
+                        <TouchableOpacity 
+                          style={[
+                            styles.shoutoutComingButton,
+                            shoutout.attending && styles.shoutoutAttendingButton
+                          ]}
+                          onPress={() => handleAttendToggle(shoutout.id, shoutout.userName)}
+                        >
+                          {!shoutout.attending && (
+                            <Text style={styles.shoutoutActionText}>Coming?</Text>
+                          )}
+                          {shoutout.attending && (
+                            <>
+                              <Ionicons 
+                                name="checkmark-circle-outline" 
+                                size={8} 
+                                color="rgba(53,48,61,0.8)" 
+                              />
+                              <Text style={styles.shoutoutActionText}>Attending</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                        {!shoutout.attending && (
+                          <TouchableOpacity style={styles.shoutoutSendButton}>
+                            <Ionicons name="send-outline" size={14} color="#35303D" />
+                          </TouchableOpacity>
+                        )}
+                      </>
+                    )}
                   </View>
                 </View>
               ))}
@@ -373,6 +431,13 @@ const HomescreenHomeScreen = () => {
         visible={showPostModal}
         onClose={() => setShowPostModal(false)}
         userAvatar={require('../assets/images/Avatar.png')}
+      />
+      
+      {/* Attending Confirmation Modal */}
+      <AttendingConfirmationModal
+        visible={showAttendingModal}
+        onClose={() => setShowAttendingModal(false)}
+        ownerName={selectedShoutoutOwner}
       />
     </SafeAreaView>
   );
@@ -712,6 +777,33 @@ const styles = StyleSheet.create({
   shoutoutActionText: {
     fontSize: 12,
     color: 'rgba(53,48,61,0.8)',
+  },
+  shoutoutComingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#CACDFF',
+    paddingHorizontal: 17,
+    paddingVertical: 8,
+    borderRadius: 30,
+    gap: 8,
+    justifyContent: 'center',
+    minWidth: 123,
+  },
+  shoutoutAttendingButton: {
+    backgroundColor: '#E9EEA8',
+  },
+  shoutoutSendButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   noMeetupsContainer: {
     backgroundColor: '#FFFFFF',
