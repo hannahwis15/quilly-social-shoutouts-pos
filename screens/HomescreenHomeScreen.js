@@ -16,8 +16,8 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { width: screenWidth } = Dimensions.get('window');
-const HEADER_MAX_HEIGHT = 300;
-const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 100 : 80;
+const HEADER_MAX_HEIGHT = 311;
+const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 164 : 144;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const HomescreenHomeScreen = () => {
@@ -62,7 +62,7 @@ const HomescreenHomeScreen = () => {
 
   const shareCardTranslate = scrollY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE],
-    outputRange: [0, -HEADER_SCROLL_DISTANCE + 60],
+    outputRange: [0, -HEADER_SCROLL_DISTANCE + 70],
     extrapolate: 'clamp',
   });
 
@@ -88,9 +88,11 @@ const HomescreenHomeScreen = () => {
           }
         ]}
       >
-        {/* House Name - Centered and will fade out */}
+        {/* House Name - Centered and aligned with notification */}
         <Animated.View style={[styles.houseNameContainer, { opacity: headerOpacity }]}>
-          <Text style={styles.houseName}>{houseName}</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.houseName}>{houseName}</Text>
+          </View>
         </Animated.View>
         
         {/* Points and Housemates - These will fade out */}
@@ -117,7 +119,7 @@ const HomescreenHomeScreen = () => {
       <View style={styles.fixedNotification}>
         <TouchableOpacity style={styles.notificationButton}>
           <View style={styles.notificationIcon}>
-            <Feather name="bell" size={20} color="#35303D" />
+            <Feather name="bell" size={18} color="#35303D" />
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>3</Text>
             </View>
@@ -163,7 +165,9 @@ const HomescreenHomeScreen = () => {
               onChangeText={setShoutoutText}
             />
             <TouchableOpacity style={styles.sendButton}>
-              <MaterialCommunityIcons name="send" size={20} color="#35303D" />
+              <View style={styles.sendButtonCircle}>
+                <MaterialCommunityIcons name="send" size={16} color="#FFFFFF" />
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -182,7 +186,7 @@ const HomescreenHomeScreen = () => {
         )}
       >
         {/* Spacer for header and share card */}
-        <View style={{ height: HEADER_MAX_HEIGHT + 90 }} />
+        <View style={{ height: HEADER_MAX_HEIGHT + 80 }} />
         
         {/* White background container for content */}
         <View style={styles.contentContainer}>
@@ -275,7 +279,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: HEADER_MIN_HEIGHT,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F1E6FF',
     zIndex: 1,
   },
   headerSection: {
@@ -292,7 +296,14 @@ const styles = StyleSheet.create({
   },
   houseNameContainer: {
     alignItems: 'center',
+    marginTop: 8,
     marginBottom: 10,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   houseName: {
     fontSize: 20,
@@ -304,36 +315,36 @@ const styles = StyleSheet.create({
   },
   fixedNotification: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 48 : 18,
-    right: 20,
+    top: Platform.OS === 'ios' ? 58 : 28,
+    right: 30,
     zIndex: 10,
   },
   notificationButton: {
     padding: 5,
   },
   notificationIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   notificationBadge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: -3,
+    right: -3,
     backgroundColor: '#FF4444',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   notificationBadgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: 'bold',
   },
   pointsRow: {
@@ -369,7 +380,7 @@ const styles = StyleSheet.create({
   },
   shareSection: {
     position: 'absolute',
-    top: HEADER_MAX_HEIGHT - 30,  // Overlap with purple header
+    top: HEADER_MAX_HEIGHT - 38,  // Overlap with purple header at 273px (311-38)
     left: 16,
     right: 16,
     backgroundColor: '#FFFFFF',
@@ -422,9 +433,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 0.8,
     borderColor: '#B2B2B2',
-    borderRadius: 20,
-    paddingHorizontal: 22,
-    paddingVertical: 10,
+    borderRadius: 25,
+    paddingLeft: 22,
+    paddingRight: 8,
+    paddingVertical: 8,
   },
   shareInput: {
     flex: 1,
@@ -432,7 +444,15 @@ const styles = StyleSheet.create({
     color: '#35303D',
   },
   sendButton: {
-    padding: 5,
+    padding: 2,
+  },
+  sendButtonCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#9599FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   happeningSection: {
     paddingHorizontal: 20,
