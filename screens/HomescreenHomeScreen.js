@@ -16,7 +16,7 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { width: screenWidth } = Dimensions.get('window');
-const HEADER_MAX_HEIGHT = 280;
+const HEADER_MAX_HEIGHT = 300;
 const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 100 : 80;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
@@ -88,8 +88,8 @@ const HomescreenHomeScreen = () => {
           }
         ]}
       >
-        {/* House Name and Notification - These will fade out */}
-        <Animated.View style={[styles.houseHeader, { opacity: headerOpacity }]}>
+        {/* House Name - Centered and will fade out */}
+        <Animated.View style={[styles.houseNameContainer, { opacity: headerOpacity }]}>
           <Text style={styles.houseName}>{houseName}</Text>
         </Animated.View>
         
@@ -182,7 +182,7 @@ const HomescreenHomeScreen = () => {
         )}
       >
         {/* Spacer for header and share card */}
-        <View style={{ height: HEADER_MAX_HEIGHT + 120 }} />
+        <View style={{ height: HEADER_MAX_HEIGHT + 90 }} />
         
         {/* White background container for content */}
         <View style={styles.contentContainer}>
@@ -286,15 +286,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1E6FF',
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingBottom: 20,
     height: HEADER_MAX_HEIGHT,
     zIndex: 2,
   },
-  houseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  houseNameContainer: {
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   houseName: {
     fontSize: 20,
@@ -302,10 +300,11 @@ const styles = StyleSheet.create({
     color: '#35303D',
     textTransform: 'uppercase',
     letterSpacing: -0.8,
+    textAlign: 'center',
   },
   fixedNotification: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
+    top: Platform.OS === 'ios' ? 48 : 18,
     right: 20,
     zIndex: 10,
   },
@@ -340,8 +339,9 @@ const styles = StyleSheet.create({
   pointsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 15,
-    marginBottom: 20,
+    marginBottom: 15,
   },
   pointsBadge: {
     backgroundColor: '#FFFFFF',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   shareSection: {
     position: 'absolute',
-    top: HEADER_MAX_HEIGHT,
+    top: HEADER_MAX_HEIGHT - 30,  // Overlap with purple header
     left: 16,
     right: 16,
     backgroundColor: '#FFFFFF',
