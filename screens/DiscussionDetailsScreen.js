@@ -18,6 +18,7 @@ const DiscussionDetailsScreen = ({ route, navigation }) => {
   const { discussion } = route.params || {};
   const [commentText, setCommentText] = useState('');
   const [showReplies, setShowReplies] = useState({});
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const scrollViewRef = useRef(null);
   
   const currentUserId = 'user123'; // Replace with actual current user ID
@@ -467,31 +468,50 @@ const DiscussionDetailsScreen = ({ route, navigation }) => {
         </ScrollView>
         
         {/* Comment Input */}
-        <View style={styles.commentInputContainer}>
-          <Image 
-            source={require('../assets/images/Avatar.png')} 
-            style={styles.inputAvatar} 
-          />
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.commentInput}
-              placeholder="Reply to this discussion..."
-              placeholderTextColor={Colors.primaryMedium}
-              value={commentText}
-              onChangeText={setCommentText}
-              multiline
+        <View style={[
+          styles.commentInputContainer,
+          isInputFocused && styles.commentInputContainerFocused
+        ]}>
+          {/* Drawer handle and title when focused */}
+          {isInputFocused && (
+            <>
+              <View style={styles.drawerHandle} />
+              <Text style={styles.replyToText}>Reply to this discussion</Text>
+            </>
+          )}
+          
+          <View style={styles.inputRow}>
+            <Image 
+              source={require('../assets/images/Avatar.png')} 
+              style={styles.inputAvatar} 
             />
-            <TouchableOpacity 
-              style={styles.sendButton}
-              onPress={handleCommentSubmit}
-              disabled={!commentText.trim()}
-            >
-              <Ionicons 
-                name="send" 
-                size={20} 
-                color={commentText.trim() ? Colors.purple : Colors.primaryLight} 
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Reply to this discussion..."
+                placeholderTextColor={isInputFocused ? '#35303D' : '#939195'}
+                value={commentText}
+                onChangeText={setCommentText}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                multiline={false}
               />
-            </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.sendButton}
+                onPress={handleCommentSubmit}
+              >
+                <View style={[
+                  styles.sendIconContainer,
+                  commentText.trim() && styles.sendIconContainerActive
+                ]}>
+                  <Ionicons 
+                    name="send" 
+                    size={16} 
+                    color={commentText.trim() ? '#FFFFFF' : '#9599FF'} 
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -742,38 +762,88 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   commentInputContainer: {
-    flexDirection: 'row',
-    padding: Spacing.md,
+    paddingHorizontal: 25,
+    paddingVertical: 18,
     borderTopWidth: 1,
     borderTopColor: Colors.grayBorder,
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backdropFilter: 'blur(7.5px)',
+  },
+  commentInputContainerFocused: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 104,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    paddingTop: 5,
+  },
+  drawerHandle: {
+    width: 36,
+    height: 5,
+    backgroundColor: 'rgba(60, 60, 67, 0.3)',
+    borderRadius: 100,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  replyToText: {
+    fontSize: 12,
+    color: '#A0A0A0',
+    marginLeft: 5,
+    marginBottom: 12,
+    letterSpacing: -0.408,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 39,
+    height: 39,
+    borderRadius: 19.5,
     backgroundColor: Colors.primary,
-    marginRight: Spacing.sm,
+    marginRight: 13,
   },
   inputWrapper: {
     flex: 1,
+    height: 39,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: Colors.grayVeryLight,
+    alignItems: 'center',
+    backgroundColor: Colors.white,
     borderRadius: 20,
-    paddingLeft: Spacing.md,
-    paddingRight: Spacing.xs,
-    paddingVertical: Spacing.sm,
+    borderWidth: 0.8,
+    borderColor: '#B2B2B2',
+    paddingLeft: 19,
+    paddingRight: 8,
   },
   commentInput: {
     flex: 1,
-    ...Typography.body,
-    fontSize: 14,
-    maxHeight: 100,
-    minHeight: 20,
+    fontSize: 12,
+    color: Colors.primary,
+    height: '100%',
+    paddingVertical: 0,
   },
   sendButton: {
-    padding: Spacing.xs,
+    padding: 0,
+    marginLeft: 8,
+  },
+  sendIconContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#E5E5E5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendIconContainerActive: {
+    backgroundColor: '#9599FF',
   },
 });
 
