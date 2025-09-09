@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
@@ -17,6 +17,8 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import EditProfileModeScreen from './screens/EditProfileModeScreen';
 import PronounsSelectionScreen from './screens/PronounsSelectionScreen';
 import LocationSelectionScreen from './screens/LocationSelectionScreen';
+import EducationEditScreen from './screens/EducationEditScreen';
+import AllMeetupsScreen from './screens/AllMeetupsScreen';
 import LoginScreen from './screens/LoginScreen';
 import MyActivityScreen from './screens/MyActivityScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
@@ -97,6 +99,11 @@ function ProfileStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen 
+        name="EducationEdit" 
+        component={EducationEditScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
         name="MyActivity" 
         component={MyActivityScreen} 
         options={{ headerShown: false }}
@@ -143,6 +150,11 @@ function HomeStack() {
         component={DiscussionDetailsScreen} 
         options={{ headerShown: false }}
       />
+      <Stack.Screen 
+        name="AllMeetups" 
+        component={AllMeetupsScreen} 
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -159,6 +171,19 @@ function DiscussionsStack() {
       <Stack.Screen 
         name="DiscussionDetails" 
         component={DiscussionDetailsScreen} 
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Meetups Stack Navigator (Calendar tab)
+function MeetupsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="AllMeetupsScreen" 
+        component={AllMeetupsScreen} 
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
@@ -245,14 +270,14 @@ function CustomTabBar({ state, descriptors, navigation, showCreateOptions, setSh
 function TabNavigator() {
   const [showCreateOptions, setShowCreateOptions] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
+  const navigation = useNavigation();
 
   const handleCreateOption = (option) => {
     if (option === 'discussion') {
       setShowPostModal(true);
     } else if (option === 'meetup') {
-      // Handle meetup creation - for now just log
-      console.log('Create Meetup selected');
-      // You can navigate to a meetup creation screen or open another modal
+      // Navigate to All Meetups screen
+      navigation.navigate('AllMeetups');
     }
   };
 
@@ -284,7 +309,7 @@ function TabNavigator() {
         />
         <Tab.Screen 
           name="Calendar" 
-          component={CreateScreen} // Placeholder - replace with Calendar screen
+          component={MeetupsStack} // Meetups/Shoutouts stack
         />
         <Tab.Screen 
           name="Profile" 

@@ -103,7 +103,12 @@ const EditProfileModeScreen = ({ navigation, route }) => {
         });
         break;
       case 'education':
-        Alert.alert('Edit Education', 'Education editing coming soon!');
+        navigation.navigate('EducationEdit', {
+          currentEducation: profileData.education,
+          onSave: (education) => {
+            setProfileData({ ...profileData, education });
+          }
+        });
         break;
     }
   };
