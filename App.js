@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,6 +6,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from '
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import HomescreenHomeScreen from './screens/HomescreenHomeScreen';
+import CreateOptionsPopup from './components/CreateOptionsPopup';
+import PostCreationModal from './components/PostCreationModal';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -82,7 +84,7 @@ function HomeStack() {
 }
 
 // Custom Tab Bar Component
-function CustomTabBar({ state, descriptors, navigation }) {
+function CustomTabBar({ state, descriptors, navigation, showCreateOptions, setShowCreateOptions }) {
   return (
     <View style={styles.tabBar}>
       {state.routes.map((route, index) => {
@@ -98,6 +100,12 @@ function CustomTabBar({ state, descriptors, navigation }) {
         const isCenter = index === 2; // Center button (Create)
 
         const onPress = () => {
+          if (isCenter) {
+            // Toggle create options popup for center button
+            setShowCreateOptions(!showCreateOptions);
+            return;
+          }
+
           const event = navigation.emit({
             type: 'tabPress',
             target: route.key,
@@ -153,34 +161,68 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
 // Main Tab Navigator
 function TabNavigator() {
+  const [showCreateOptions, setShowCreateOptions] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
+
+  const handleCreateOption = (option) => {
+    if (option === 'discussion') {
+      setShowPostModal(true);
+    } else if (option === 'meetup') {
+      // Handle meetup creation - for now just log
+      console.log('Create Meetup selected');
+      // You can navigate to a meetup creation screen or open another modal
+    }
+  };
+
   return (
-    <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeStack}
+    <>
+      <Tab.Navigator
+        tabBar={(props) => (
+          <CustomTabBar 
+            {...props} 
+            showCreateOptions={showCreateOptions}
+            setShowCreateOptions={setShowCreateOptions}
+          />
+        )}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Tab.Screen 
+          name="Home" 
+          component={HomeStack}
+        />
+        <Tab.Screen 
+          name="Messages" 
+          component={CreateScreen} // Placeholder - replace with Messages screen
+        />
+        <Tab.Screen 
+          name="Create" 
+          component={CreateScreen}
+        />
+        <Tab.Screen 
+          name="Calendar" 
+          component={ProfileScreen} // Placeholder - replace with Calendar screen
+        />
+        <Tab.Screen 
+          name="Profile" 
+          component={ProfileScreen}
+        />
+      </Tab.Navigator>
+      
+      {/* Create Options Popup */}
+      <CreateOptionsPopup
+        visible={showCreateOptions}
+        onClose={() => setShowCreateOptions(false)}
+        onSelectOption={handleCreateOption}
       />
-      <Tab.Screen 
-        name="Messages" 
-        component={CreateScreen} // Placeholder - replace with Messages screen
+      
+      {/* Post Creation Modal */}
+      <PostCreationModal
+        visible={showPostModal}
+        onClose={() => setShowPostModal(false)}
       />
-      <Tab.Screen 
-        name="Create" 
-        component={CreateScreen}
-      />
-      <Tab.Screen 
-        name="Calendar" 
-        component={ProfileScreen} // Placeholder - replace with Calendar screen
-      />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen}
-      />
-    </Tab.Navigator>
+    </>
   );
 }
 
