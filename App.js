@@ -8,11 +8,19 @@ import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome } from '@expo/ve
 import HomescreenHomeScreen from './screens/HomescreenHomeScreen';
 import DiscussionsScreen from './screens/DiscussionsScreen';
 import DiscussionDetailsScreen from './screens/DiscussionDetailsScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import MyEventsScreen from './screens/MyEventsScreen';
+import MyDiscussionsScreen from './screens/MyDiscussionsScreen';
+import MyShoutoutsScreen from './screens/MyShoutoutsScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+import LoginScreen from './screens/LoginScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
 import PostCreationModal from './components/PostCreationModal';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const RootStack = createStackNavigator();
 
 // Create Shoutout Screen
 function CreateScreen({ navigation }) {
@@ -35,16 +43,41 @@ function CreateScreen({ navigation }) {
   );
 }
 
-// Profile Screen
-function ProfileScreen() {
+// Profile Stack Navigator
+function ProfileStack() {
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>My Profile</Text>
-        <Text style={styles.subtitle}>Your Shoutouts: 12</Text>
-        <Text style={styles.subtitle}>Received: 8</Text>
-      </View>
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="ProfileScreen" 
+        component={ProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="MyEvents" 
+        component={MyEventsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="MyDiscussions" 
+        component={MyDiscussionsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="MyShoutouts" 
+        component={MyShoutoutsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="EditProfile" 
+        component={EditProfileScreen} 
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -227,11 +260,11 @@ function TabNavigator() {
         />
         <Tab.Screen 
           name="Calendar" 
-          component={ProfileScreen} // Placeholder - replace with Calendar screen
+          component={CreateScreen} // Placeholder - replace with Calendar screen
         />
         <Tab.Screen 
           name="Profile" 
-          component={ProfileScreen}
+          component={ProfileStack}
         />
       </Tab.Navigator>
       
@@ -251,12 +284,27 @@ function TabNavigator() {
   );
 }
 
+// Main App with Tab Navigator
+function MainApp() {
+  return <TabNavigator />;
+}
+
+// Root Navigator with Login flow
+function RootNavigator() {
+  return (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen name="Main" component={MainApp} />
+    </RootStack.Navigator>
+  );
+}
+
 // Main App Component
 export default function App() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      <TabNavigator />
+      <RootNavigator />
     </NavigationContainer>
   );
 }

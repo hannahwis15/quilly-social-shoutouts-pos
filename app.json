@@ -105,6 +105,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "androidNavigationBar": {}
+    "androidNavigationBar": {},
+    "newArchEnabled": true
   }
 }

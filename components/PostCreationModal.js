@@ -18,15 +18,15 @@ import { getCategoryById, getCategoryEmoji } from '../config/categories';
 
 const PostCreationModal = ({ visible, onClose, userAvatar }) => {
   const [postText, setPostText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const handlePost = () => {
     if (postText.trim()) {
       // Handle post submission
-      console.log('Posting:', postText, 'Category:', selectedCategory);
+      console.log('Posting:', postText, 'Categories:', selectedCategories);
       setPostText('');
-      setSelectedCategory(null);
+      setSelectedCategories([]);
       onClose();
     }
   };
@@ -105,17 +105,21 @@ const PostCreationModal = ({ visible, onClose, userAvatar }) => {
               <TouchableOpacity 
                 style={[
                   styles.categorySelector,
-                  selectedCategory && styles.categorySelectorActive
+                  selectedCategories.length > 0 && styles.categorySelectorActive
                 ]}
                 onPress={() => setShowCategoryModal(true)}
               >
-                {selectedCategory ? (
+                {selectedCategories.length > 0 ? (
                   <>
-                    <Text style={styles.categoryEmoji}>
-                      {getCategoryEmoji(selectedCategory)}
-                    </Text>
+                    {selectedCategories.slice(0, 2).map((categoryId, index) => (
+                      <Text key={categoryId} style={styles.categoryEmoji}>
+                        {getCategoryEmoji(categoryId)}
+                      </Text>
+                    ))}
                     <Text style={styles.categoryText}>
-                      {getCategoryById(selectedCategory)?.label}
+                      {selectedCategories.length === 1 
+                        ? getCategoryById(selectedCategories[0])?.label
+                        : `${selectedCategories.length} selected`}
                     </Text>
                   </>
                 ) : (
@@ -134,8 +138,8 @@ const PostCreationModal = ({ visible, onClose, userAvatar }) => {
       <CategorySelectionModal
         visible={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        selectedCategories={selectedCategories}
+        onSelectCategories={setSelectedCategories}
       />
     </Modal>
   );

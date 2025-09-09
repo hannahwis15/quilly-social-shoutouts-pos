@@ -12,26 +12,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { CATEGORY_GROUPS } from '../config/categories';
 
-const CategorySelectionModal = ({ visible, onClose, selectedCategories = [], onSelectCategory, maxSelections = 2 }) => {
+const CategorySelectionModal = ({ visible, onClose, selectedCategories = [], onSelectCategories, maxSelections = 2 }) => {
   const [tempSelected, setTempSelected] = useState(selectedCategories);
 
   React.useEffect(() => {
-    setTempSelected(selectedCategories);
-  }, [selectedCategories]);
+    // Only update if visible changes or selectedCategories actually changes
+    if (visible) {
+      setTempSelected(selectedCategories);
+    }
+  }, [visible, selectedCategories]);
 
   const handleSave = () => {
-    // Apply all selected categories
-    tempSelected.forEach(categoryId => {
-      if (!selectedCategories.includes(categoryId)) {
-        onSelectCategory(categoryId);
-      }
-    });
-    // Remove deselected categories
-    selectedCategories.forEach(categoryId => {
-      if (!tempSelected.includes(categoryId)) {
-        onSelectCategory(categoryId); // This will toggle it off
-      }
-    });
+    // Pass the entire array of selected categories at once
+    onSelectCategories(tempSelected);
     onClose();
   };
 
