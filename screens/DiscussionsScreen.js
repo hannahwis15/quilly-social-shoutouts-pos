@@ -22,7 +22,7 @@ const DiscussionsScreen = () => {
   const currentUserId = 'user123'; // Replace with actual current user ID
   
   // Sample discussions data - in production, this would come from a global state/context
-  const [discussions] = useState([
+  const [discussions, setDiscussions] = useState([
     {
       id: 1,
       owner: {
@@ -141,6 +141,34 @@ const DiscussionsScreen = () => {
       console.log('Share discussion:', discussionId);
     }
   };
+  
+  // Handle reaction toggle
+  const handleReactionToggle = (discussionId) => {
+    setDiscussions(prev => prev.map(discussion => {
+      if (discussion.id === discussionId) {
+        const userReaction = discussion.reactions?.find(r => r.user_id === currentUserId);
+        
+        if (userReaction) {
+          // Remove user's reaction
+          return {
+            ...discussion,
+            reactions: discussion.reactions.filter(r => r.user_id !== currentUserId)
+          };
+        } else {
+          // Add user's reaction
+          return {
+            ...discussion,
+            reactions: [...(discussion.reactions || []), {
+              id: Date.now(),
+              user_id: currentUserId,
+              type: 'heart'
+            }]
+          };
+        }
+      }
+      return discussion;
+    }));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -240,6 +268,7 @@ const DiscussionsScreen = () => {
               isOwner={isOwner}
               currentUserId={currentUserId}
               onDropdownAction={handleDropdownAction}
+              onReactionToggle={handleReactionToggle}
             />
           );
         })}

@@ -13,9 +13,13 @@ const DiscussionCard = ({
   category, 
   isOwner, 
   onDropdownAction,
-  currentUserId 
+  currentUserId,
+  onReactionToggle 
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Check if current user has reacted
+  const hasUserReacted = discussion.reactions?.some(reaction => reaction.user_id === currentUserId);
 
   const getTimeAgo = (date) => {
     const now = new Date();
@@ -96,10 +100,19 @@ const DiscussionCard = ({
             <Ionicons name="chatbubble-outline" size={12} color="#35303D" />
             <Text style={styles.discussionStatText}>{discussion.comments?.length || 0}</Text>
           </View>
-          <View style={styles.discussionStat}>
-            <Ionicons name="heart-outline" size={12} color="#35303D" />
-            <Text style={styles.discussionStatText}>{discussion.reactions?.length || 0}</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.discussionStat}
+            onPress={() => onReactionToggle && onReactionToggle(discussion.id)}
+          >
+            <Ionicons 
+              name={hasUserReacted ? "heart" : "heart-outline"} 
+              size={12} 
+              color={hasUserReacted ? "#FF4444" : "#35303D"} 
+            />
+            <Text style={[styles.discussionStatText, hasUserReacted && styles.discussionStatTextActive]}>
+              {discussion.reactions?.length || 0}
+            </Text>
+          </TouchableOpacity>
           <View style={styles.discussionStat}>
             <Ionicons name="share-outline" size={12} color="#35303D" />
             <Text style={styles.discussionStatText}>{discussion.shares?.length || 0}</Text>
@@ -224,6 +237,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#35303D',
     letterSpacing: -0.24,
+  },
+  discussionStatTextActive: {
+    color: '#FF4444',
   },
   discussionTag: {
     flexDirection: 'row',

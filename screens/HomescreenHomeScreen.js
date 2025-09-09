@@ -373,6 +373,34 @@ const HomescreenHomeScreen = () => {
   const removeCategoryFilter = (categoryId) => {
     setSelectedCategories(prev => prev.filter(id => id !== categoryId));
   };
+  
+  // Handle reaction toggle
+  const handleReactionToggle = (discussionId) => {
+    setDiscussions(prev => prev.map(discussion => {
+      if (discussion.id === discussionId) {
+        const userReaction = discussion.reactions?.find(r => r.user_id === currentUserId);
+        
+        if (userReaction) {
+          // Remove user's reaction
+          return {
+            ...discussion,
+            reactions: discussion.reactions.filter(r => r.user_id !== currentUserId)
+          };
+        } else {
+          // Add user's reaction
+          return {
+            ...discussion,
+            reactions: [...(discussion.reactions || []), {
+              id: Date.now(),
+              user_id: currentUserId,
+              type: 'heart'
+            }]
+          };
+        }
+      }
+      return discussion;
+    }));
+  };
 
   // Animation interpolations
   const headerTranslate = scrollY.interpolate({
@@ -707,6 +735,7 @@ const HomescreenHomeScreen = () => {
                   isOwner={isOwner}
                   currentUserId={currentUserId}
                   onDropdownAction={handleDropdownAction}
+                  onReactionToggle={handleReactionToggle}
                 />
               );
             })}
