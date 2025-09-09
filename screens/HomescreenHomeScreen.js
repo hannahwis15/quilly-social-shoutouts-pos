@@ -12,8 +12,10 @@ import {
   Dimensions,
   Animated,
   Platform,
+  Pressable,
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import PostCreationModal from '../components/PostCreationModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 const HEADER_MAX_HEIGHT = 311;
@@ -22,6 +24,7 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const HomescreenHomeScreen = () => {
   const [shoutoutText, setShoutoutText] = useState('');
+  const [showPostModal, setShowPostModal] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   
   const houseName = "KAHLO HOUSE";
@@ -156,20 +159,17 @@ const HomescreenHomeScreen = () => {
             source={require('../assets/images/Avatar.png')}
             style={styles.userAvatar}
           />
-          <View style={styles.shareInputContainer}>
-            <TextInput
-              style={styles.shareInput}
-              placeholder="Share with your housemates!"
-              placeholderTextColor="#35303D"
-              value={shoutoutText}
-              onChangeText={setShoutoutText}
-            />
-            <TouchableOpacity style={styles.sendButton}>
-              <View style={styles.sendButtonCircle}>
-                <MaterialCommunityIcons name="send" size={16} color="#9599FF" />
-              </View>
-            </TouchableOpacity>
-          </View>
+          <Pressable 
+            style={styles.shareInputContainer}
+            onPress={() => setShowPostModal(true)}
+          >
+            <Text style={styles.shareInputPlaceholder}>
+              Share with your housemates!
+            </Text>
+            <View style={styles.sendButtonCircle}>
+              <MaterialCommunityIcons name="send" size={16} color="#9599FF" />
+            </View>
+          </Pressable>
         </View>
       </Animated.View>
       
@@ -252,6 +252,13 @@ const HomescreenHomeScreen = () => {
         
         </View>
       </Animated.ScrollView>
+      
+      {/* Post Creation Modal */}
+      <PostCreationModal
+        visible={showPostModal}
+        onClose={() => setShowPostModal(false)}
+        userAvatar={require('../assets/images/Avatar.png')}
+      />
     </SafeAreaView>
   );
 };
@@ -438,13 +445,10 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     paddingVertical: 8,
   },
-  shareInput: {
+  shareInputPlaceholder: {
     flex: 1,
     fontSize: 12,
     color: '#35303D',
-  },
-  sendButton: {
-    padding: 2,
   },
   sendButtonCircle: {
     width: 28,
