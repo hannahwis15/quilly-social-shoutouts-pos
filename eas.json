@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 5.9.1",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium",
+        "buildConfiguration": "Release"
+      },
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6739363008"
+      }
+    }
+  }
+}

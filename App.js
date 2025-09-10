@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+import { GlobalVariableProvider } from './config/GlobalVariableContext';
 import HomescreenHomeScreen from './screens/HomescreenHomeScreen';
 import DiscussionsScreen from './screens/DiscussionsScreen';
 import DiscussionDetailsScreen from './screens/DiscussionDetailsScreen';
@@ -20,6 +21,8 @@ import LocationSelectionScreen from './screens/LocationSelectionScreen';
 import EducationEditScreen from './screens/EducationEditScreen';
 import AllMeetupsScreen from './screens/AllMeetupsScreen';
 import LoginScreen from './screens/LoginScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
 import MyActivityScreen from './screens/MyActivityScreen';
 import CreateOptionsPopup from './components/CreateOptionsPopup';
 import PostCreationModal from './components/PostCreationModal';
@@ -141,6 +144,11 @@ function HomeStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen 
+        name="Notifications" 
+        component={NotificationsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
         name="ShoutoutDetail" 
         component={ShoutoutDetailScreen} 
         options={{ title: 'Details' }}
@@ -166,6 +174,11 @@ function DiscussionsStack() {
       <Stack.Screen 
         name="DiscussionsScreen" 
         component={DiscussionsScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Notifications" 
+        component={NotificationsScreen} 
         options={{ headerShown: false }}
       />
       <Stack.Screen 
@@ -343,6 +356,7 @@ function RootNavigator() {
   return (
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <RootStack.Screen name="Main" component={MainApp} />
     </RootStack.Navigator>
   );
@@ -351,10 +365,12 @@ function RootNavigator() {
 // Main App Component
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar style="auto" />
-      <RootNavigator />
-    </NavigationContainer>
+    <GlobalVariableProvider>
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <RootNavigator />
+      </NavigationContainer>
+    </GlobalVariableProvider>
   );
 }
 

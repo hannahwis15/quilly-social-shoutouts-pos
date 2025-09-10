@@ -177,7 +177,10 @@ const DiscussionsScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View />
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity 
+            style={styles.notificationButton}
+            onPress={() => navigation.navigate('Notifications')}
+          >
             <Ionicons name="notifications-outline" size={24} color="#35303D" />
           </TouchableOpacity>
         </View>

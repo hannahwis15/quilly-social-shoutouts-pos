@@ -1,1 +1,0 @@
-../../../Target Support Files/ReactNativeAvoidSoftinput/ReactNativeAvoidSoftinput-umbrella.h

@@ -162,9 +162,10 @@ export function GlobalVariableProvider({ children }) {
     }
   }, [state]);
 
-  const onLayoutRootView = React.useCallback(async () => {
+  // Hide splash screen once loaded
+  React.useEffect(() => {
     if (state.__loaded) {
-      await SplashScreen.hideAsync();
+      SplashScreen.hideAsync();
     }
   }, [state.__loaded]);
 
@@ -175,10 +176,7 @@ export function GlobalVariableProvider({ children }) {
   }
 
   return (
-    <GlobalVariableUpdater.Provider
-      value={dispatch}
-      onLayout={onLayoutRootView}
-    >
+    <GlobalVariableUpdater.Provider value={dispatch}>
       <GlobalVariableContext.Provider value={state.values}>
         {children}
       </GlobalVariableContext.Provider>

@@ -500,7 +500,10 @@ const HomescreenHomeScreen = ({ navigation }) => {
 
       {/* Fixed Notification Bell - Always visible */}
       <View style={styles.fixedNotification}>
-        <TouchableOpacity style={styles.notificationButton}>
+        <TouchableOpacity 
+          style={styles.notificationButton}
+          onPress={() => navigation.navigate('Notifications')}
+        >
           <View style={styles.notificationIcon}>
             <Feather name="bell" size={18} color="#35303D" />
             <View style={styles.notificationBadge}>

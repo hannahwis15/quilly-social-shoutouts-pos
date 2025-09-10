@@ -1,5 +1,15 @@
 {
   "expo": {
+    "sdkVersion": "52.0.0",
+    "name": "Quilly",
+    "slug": "quilly-app",
+    "version": "1.6.1000",
+    "orientation": "default",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "config": {
         "googleMapsApiKey": "AIzaSyCNCK08x_qiMgLQGsXk-fjh2O0VaRoN0c0",
@@ -9,7 +19,7 @@
         "NSCameraUsageDescription": "This app uses the camera to scan barcodes on event tickets.",
         "NSLocationWhenInUseUsageDescription": "This app uses the location to create a list of local services."
       },
-      "buildNumber": "1.0.0",
+      "buildNumber": "4",
       "supportsTablet": false,
       "bundleIdentifier": "com.myquilly.app",
       "usesIcloudStorage": false,
@@ -46,11 +56,9 @@
       "themeColor": "#000000"
     },
     "icon": "./assets/app/icon.png",
-    "name": "Quilly Social Shoutouts POC",
-    "slug": "quilly-social-shoutouts-poc",
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "e3a26a2e-9a0b-4f80-9ba1-ef06eb971b23"
       }
     },
     "scheme": "untitled-app",
@@ -86,14 +94,7 @@
       ]
     ],
     "privacy": "unlisted",
-    "version": "1.0.0",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
     "description": "An app to help girls navigate college together. ",
-    "orientation": "default",
     "iosStatusBar": {},
     "notification": {
       "androidMode": "default"

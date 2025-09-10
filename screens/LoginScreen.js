@@ -10,31 +10,85 @@ import {
   Platform,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing } from '../config/styles';
+import * as AuthenticationApi from '../apis/AuthenticationApi';
+import * as GlobalVariables from '../config/GlobalVariableContext';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const Constants = GlobalVariables.useValues();
+  const setGlobalVariableValue = GlobalVariables.useSetValue();
   
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      alert('Please enter email and password');
+      setErrorMessage('Please enter email and password.');
       return;
     }
     
     setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
+    setErrorMessage('');
+    
+    try {
+      const response = await AuthenticationApi.loginPOST(
+        Constants,
+        { email, password },
+        {},
+        10000
+      );
+      
+      // Check if login was successful
+      if (response && response.status === 200 && response.json) {
+        const data = response.json;
+        
+        if (data.authToken) {
+          // Store auth token with Bearer prefix for API requests
+          setGlobalVariableValue({
+            key: 'AUTHORIZATION_TOKEN',
+            value: `Bearer ${data.authToken}`,
+          });
+          
+          // Store user data if available
+          if (data.user) {
+            setGlobalVariableValue({
+              key: 'USER_ID',
+              value: data.user.id,
+            });
+            setGlobalVariableValue({
+              key: 'USER_DATA',
+              value: data.user,
+            });
+          }
+          
+          // Navigate to main app - replacing the entire stack
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          });
+        } else {
+          setErrorMessage('Incorrect email or password.');
+        }
+      } else {
+        // Handle error responses
+        if (response && response.status === 401) {
+          setErrorMessage('Incorrect email or password.');
+        } else if (response && response.status === 404) {
+          setErrorMessage('Account not found. Please check your email.');
+        } else {
+          setErrorMessage('Something went wrong. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage('Unable to connect. Please check your internet connection.');
+    } finally {
       setIsLoading(false);
-      // Navigate to main app - replacing the entire stack
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
-    }, 1000);
+    }
   };
   
   const handleSignup = () => {
@@ -43,7 +97,7 @@ const LoginScreen = ({ navigation }) => {
   };
   
   const handleForgotPassword = () => {
-    alert('Password reset flow coming soon!');
+    navigation.navigate('ForgotPassword');
   };
   
   const handleNotBerkeleyStudent = () => {
@@ -100,7 +154,10 @@ const LoginScreen = ({ navigation }) => {
                 <TextInput
                   style={styles.input}
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   placeholder="Enter your email"
                   placeholderTextColor="rgba(0, 0, 0, 0.3)"
                   keyboardType="email-address"
@@ -114,7 +171,10 @@ const LoginScreen = ({ navigation }) => {
                 <TextInput
                   style={styles.input}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   placeholder="Enter your password"
                   placeholderTextColor="rgba(0, 0, 0, 0.3)"
                   secureTextEntry
@@ -132,6 +192,13 @@ const LoginScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+            
+            {/* Error Message */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
             
             {/* Login Button */}
             <TouchableOpacity 
@@ -320,6 +387,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textDecorationLine: 'underline',
     letterSpacing: -0.48,
+  },
+  errorContainer: {
+    backgroundColor: '#FF6C1F',
+    borderRadius: 30,
+    paddingVertical: 4,
+    paddingHorizontal: 54,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  errorText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: Colors.black,
+    lineHeight: 20,
   },
 });
 
